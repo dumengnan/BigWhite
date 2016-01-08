@@ -229,6 +229,7 @@ public class MainActivity extends Activity {
         final int POP_WINDOW_HEIGHT = (int) (getResources().getDisplayMetrics().density*60 + 0.5f);
         final View popupView = mLayoutInflater.inflate(R.layout.view_color_popup, null);
         final View colorFrame = findViewById(R.id.color_frame);
+        mColor = (ImageView) findViewById(R.id.color);//颜色框
 
         colorFrame.setOnClickListener(new View.OnClickListener()
         {
@@ -262,6 +263,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 drawView.setmColor(Color.WHITE);
                 mPopupWindow.dismiss();
+                mColor.setBackgroundColor(Color.WHITE);
             }
         });
         mColorBlue.setOnClickListener(new View.OnClickListener()
@@ -270,12 +272,14 @@ public class MainActivity extends Activity {
             {
                 drawView.setmColor(Color.BLUE);
                 mPopupWindow.dismiss();
+                mColor.setBackgroundColor(Color.BLUE);
             }
         });
         mColorGreen.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 drawView.setmColor(Color.GREEN);
                 mPopupWindow.dismiss();
+                mColor.setBackgroundColor(Color.GREEN);
             }
         });
         mColorRed.setOnClickListener(new View.OnClickListener()
@@ -284,12 +288,14 @@ public class MainActivity extends Activity {
             {
                 drawView.setmColor(Color.RED);
                 mPopupWindow.dismiss();
+                mColor.setBackgroundColor(Color.RED);
             }
         });
         mColorYellow.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 drawView.setmColor(Color.YELLOW);
                 mPopupWindow.dismiss();
+                mColor.setBackgroundColor(Color.YELLOW);
             }
         });
     }
