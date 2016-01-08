@@ -133,6 +133,8 @@ public class MainActivity extends Activity {
 
         mClear = (ImageView) findViewById(R.id.clear);
 
+        mColor = (ImageView) findViewById(R.id.color);//颜色框
+
         drawView = new DrawView(this);
         paint = new Paint();
 
@@ -229,7 +231,6 @@ public class MainActivity extends Activity {
         final int POP_WINDOW_HEIGHT = (int) (getResources().getDisplayMetrics().density*60 + 0.5f);
         final View popupView = mLayoutInflater.inflate(R.layout.view_color_popup, null);
         final View colorFrame = findViewById(R.id.color_frame);
-        mColor = (ImageView) findViewById(R.id.color);//颜色框
 
         colorFrame.setOnClickListener(new View.OnClickListener()
         {
