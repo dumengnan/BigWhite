@@ -5,7 +5,7 @@
     android:gravity="center_vertical" >
 
     <ImageView
-        android:id="@+id/pen_width1"
+        android:id="@+id/eraser_width1"
         android:layout_width="50dip"
         android:layout_height="50dip"
         android:background="@drawable/toolbox_selector"
@@ -13,7 +13,7 @@
         android:src="@drawable/ic_eraser_width_1" />
 
     <ImageView
-        android:id="@+id/pen_width2"
+        android:id="@+id/eraser_width2"
         android:layout_width="50dip"
         android:layout_height="50dip"
         android:layout_marginLeft="3dip"
@@ -22,7 +22,7 @@
         android:src="@drawable/ic_eraser_width_2" />
 
     <ImageView
-        android:id="@+id/pen_width3"
+        android:id="@+id/eraser_width3"
         android:layout_width="50dip"
         android:layout_height="50dip"
         android:layout_marginLeft="3dip"

@@ -1,43 +1,22 @@
 package com.bigwhite;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.Image;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.os.Message;
-import android.preference.PreferenceManager;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import java.io.File;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class MainActivity extends Activity {
 
@@ -83,16 +62,16 @@ public class MainActivity extends Activity {
         initView();//界面相关组件初始化
         initPenSize();//画笔宽度设置监听初始化
         initClear(); //一键清除功能初始化
-        initNewPage();
+        initNewPage();//加载背景（eg.word ppt pdf）
         initColor();//颜色选择初始化
-     //   initEraser();
+        initEraser();
     }
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
         //根据之前选择的笔迹宽度，以及笔迹颜色进行处理
         paint.setStrokeWidth(drawView.getmPenWidth());
-        paint.setColor(Color.BLACK);
+        paint.setColor(drawView.getmColor());
 
         switch (event.getAction())
         {
@@ -169,8 +148,9 @@ public class MainActivity extends Activity {
 
         mEdit.setOnClickListener(new View.OnClickListener() {
             public void onClick(View paramView) {
-                mEdit.setSelected(true);  //将笔迹设为真
-                mEraser.setSelected(false);//将橡皮擦置为假
+                mEdit.setSelected(true);  //设置当前点击的按钮变色
+                mEraser.setSelected(false);
+                mClear.setSelected(false);
 
                 mPopupWindow.setContentView(popupView); //将笔迹宽度放入对话框中
                 mPopupWindow.setWidth(POP_WINDOW_WIDTH);
@@ -202,23 +182,20 @@ public class MainActivity extends Activity {
         public void onClick(View v) {
             drawView.setmPenWidth(1f);
             mPopupWindow.dismiss();
-            mEdit.setSelected(false);
         }
     });
         width2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 drawView.setmPenWidth(3f);
-                Log.e("BigWhite","selected 3f pen size");
+                Log.e("BigWhite", "selected 3f pen size");
                 mPopupWindow.dismiss();
-                mEdit.setSelected(false);
             }
         });
         width3.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 drawView.setmPenWidth(6f);
-                Log.e("BigWhite","selected 6f pen size");
+                Log.e("BigWhite", "selected 6f pen size");
                 mPopupWindow.dismiss();
-                mEdit.setSelected(false);
             }
         });
     }
@@ -229,7 +206,10 @@ public class MainActivity extends Activity {
         {
             public void onClick(View paramView)
             {
-                mClear.setSelected(true);
+                mClear.setSelected(true); //设置当前点击的按钮变色
+                mEdit.setSelected(false);
+                mEraser.setSelected(false);
+
                 if(baseBitmap != null)
                 {
                     baseBitmap = Bitmap.createBitmap(paintArea.getWidth(),
@@ -239,7 +219,6 @@ public class MainActivity extends Activity {
                     canvas.drawColor(Color.WHITE);
                     paintArea.setImageBitmap(baseBitmap);
                 }
-                mClear.setSelected(false);
             }
         });
     }
@@ -255,18 +234,132 @@ public class MainActivity extends Activity {
         {
             public void onClick(View paramView)
             {
+                mEraser.setSelected(false);
+                mEdit.setSelected(false);
+                mClear.setSelected(false);
+
                 mPopupWindow.setContentView(popupView);
                 mPopupWindow.setWidth(POP_WINDOW_WIDTH);
                 mPopupWindow.setHeight(POP_WINDOW_HEIGHT);
                 mPopupWindow.setAnimationStyle(R.style.pop_settings);
                 mPopupWindow.showAtLocation(colorFrame, Gravity.LEFT | Gravity.TOP, mToolbox.getRight(),
-                        mToolbox.getTop() + colorFrame.getTop() - (int) (getResources().getDisplayMetrics().density*5 + 0.5f));
+                        mToolbox.getTop() + colorFrame.getTop() - (int) (getResources().getDisplayMetrics().density * 5 + 0.5f));
+            }
+        });
+
+        mColorWhite = (ImageView) popupView.findViewById(R.id.color_white);
+        mColorWhite.setBackgroundColor(Color.WHITE);
+        mColorBlue = (ImageView) popupView.findViewById(R.id.color_blue);
+        mColorBlue.setBackgroundColor(Color.BLUE);
+        mColorGreen = (ImageView) popupView.findViewById(R.id.color_green);
+        mColorGreen.setBackgroundColor(Color.GREEN);
+        mColorRed = (ImageView) popupView.findViewById(R.id.color_red);
+        mColorRed.setBackgroundColor(Color.RED);
+        mColorYellow = (ImageView) popupView.findViewById(R.id.color_yellow);
+        mColorYellow.setBackgroundColor(Color.YELLOW);
+
+        mColorWhite.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                drawView.setmColor(Color.WHITE);
+                mPopupWindow.dismiss();
+            }
+        });
+        mColorBlue.setOnClickListener(new View.OnClickListener()
+        {
+            public void onClick(View v)
+            {
+                drawView.setmColor(Color.BLUE);
+                mPopupWindow.dismiss();
+            }
+        });
+        mColorGreen.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                drawView.setmColor(Color.GREEN);
+                mPopupWindow.dismiss();
+            }
+        });
+        mColorRed.setOnClickListener(new View.OnClickListener()
+        {
+            public void onClick(View v)
+            {
+                drawView.setmColor(Color.RED);
+                mPopupWindow.dismiss();
+            }
+        });
+        mColorYellow.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                drawView.setmColor(Color.YELLOW);
+                mPopupWindow.dismiss();
             }
         });
     }
 
     private void initNewPage()
     {
+
+    }
+
+    private void initEraser()
+    {
+        final int POP_WINDOW_WIDTH = WindowManager.LayoutParams.WRAP_CONTENT;
+        final int POP_WINDOW_HEIGHT = (int) (getResources().getDisplayMetrics().density *60 + 0.5f);
+        final View eraser_popupView = mLayoutInflater.inflate(R.layout.view_popup_eraser,null);
+        final View eraser_width1 = eraser_popupView.findViewById(R.id.eraser_width1);
+        final View eraser_width2 = eraser_popupView.findViewById(R.id.eraser_width2);
+        final View eraser_width3 = eraser_popupView.findViewById(R.id.eraser_width3);
+
+        mEraser.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View paramView) {
+                mEraser.setSelected(true);//设置当前点击的按钮变色
+                mEdit.setSelected(false);
+                mClear.setSelected(false);
+
+                mPopupWindow.setContentView(eraser_popupView); //将橡皮宽度放入对话框中
+                mPopupWindow.setWidth(POP_WINDOW_WIDTH);
+                mPopupWindow.setHeight(POP_WINDOW_HEIGHT);
+
+                mPopupWindow.setAnimationStyle(R.style.pop_settings);
+                mPopupWindow.showAtLocation(mEraser, Gravity.LEFT | Gravity.TOP, mToolbox.getRight(), mToolbox.getTop()
+                        + mEraser.getTop() - (int) (getResources().getDisplayMetrics().density * 5 + 0.5f));
+
+                float eraserSize = drawView.getmEraserWidth(); //默认的橡皮擦宽度10
+
+                if (eraserSize == 10) {
+                    eraser_width1.setSelected(true);
+                    eraser_width2.setSelected(false);
+                    eraser_width3.setSelected(false);
+                } else if (eraserSize == 20) {
+                    eraser_width1.setSelected(false);
+                    eraser_width2.setSelected(true);
+                    eraser_width3.setSelected(false);
+                } else if (eraserSize == 30) {
+                    eraser_width1.setSelected(false);
+                    eraser_width2.setSelected(false);
+                    eraser_width3.setSelected(true);
+                }
+            }
+        });
+        //监听选中的橡皮擦宽度
+        eraser_width1.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                drawView.setmEraserWidth(10);
+                mPopupWindow.dismiss();
+            }
+        });
+        eraser_width2.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                drawView.setmEraserWidth(20);
+                Log.e("BigWhite", "selected 3f pen size");
+                mPopupWindow.dismiss();
+            }
+        });
+        eraser_width3.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                drawView.setmEraserWidth(30);
+                Log.e("BigWhite", "selected 6f pen size");
+                mPopupWindow.dismiss();
+            }
+        });
 
     }
 }
