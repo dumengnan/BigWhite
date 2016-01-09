@@ -23,29 +23,28 @@ public class FileManagerActivity extends ListActivity{
     private String rootPath = Environment.getExternalStorageDirectory().getPath();
     private String curPath = Environment.getExternalStorageDirectory().getPath();
     private TextView mPath;
+    private String filepath = null;
 
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        System.out.println("*****************************************3");
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        System.out.println("************************************************4");
         setContentView(R.layout.activity_filemanager);
 
-        System.out.println("************************************************2");
         mPath = (TextView) findViewById(R.id.mPath);
+
         Button buttonConfirm = (Button) findViewById(R.id.buttonConfirm);
-        System.out.println("************************************************3");
         buttonConfirm.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-                Intent data = new Intent(FileManagerActivity.this, MainActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putString("file", curPath);
-                data.putExtras(bundle);
-                setResult(2, data);
-                finish();
-
+                if(filepath != null){
+                    Intent data = new Intent(FileManagerActivity.this, MainActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("file", filepath);
+                    data.putExtras(bundle);
+                    setResult(2, data);
+                    finish();
+                }
             }
         });
         Button buttonCancle = (Button) findViewById(R.id.buttonCancle);
@@ -87,12 +86,12 @@ public class FileManagerActivity extends ListActivity{
             curPath = paths.get(position);
             getFileDir(paths.get(position));
         } else {
-            Intent data = new Intent(FileManagerActivity.this, MainActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putString("file", curPath+"/"+file.getName());
-            data.putExtras(bundle);
-            setResult(3, data);
-            finish();
+            filepath = null;
+            String fname = file.getName();
+            String end = file.getName().substring(fname.lastIndexOf(".")+1,fname.length());
+            if(end.equals("pdf")){
+                filepath = curPath+"/"+file.getName();
+            }
         }
     }
 }

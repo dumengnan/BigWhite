@@ -19,6 +19,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -36,17 +38,9 @@ public class MainActivity extends Activity {
     private ImageView mEdit;
     private ImageView mEraser;
     private ImageView mClear;
-    private ImageView mSettings;
-    private ImageView mPage;
     private ImageView mNewPage;
-    private ImageView mShape;
-    private ImageView mUndo;
-    private ImageView mRedo;
-    private Handler mHandler;
 
     private ImageView paintArea;
-    private int inColor;
-    private float inPenWidth;
     private DrawView drawView;
     private Bitmap baseBitmap;
     private Canvas canvas;
@@ -333,8 +327,33 @@ public class MainActivity extends Activity {
         if(FILE_RESULT_CODE == requestCode){
             Bundle bundle = null;
             if(data!=null&&(bundle=data.getExtras())!=null){
-                Log.e("BigWhite","select folder is " + bundle.getString("file"));
+                Log.e("BigWhite","select foleder file name is " + bundle.getString("file"));
                // textView.setText("选择文件夹为："+bundle.getString("file"));
+                String openedPdfFileName;
+                OpenPdf openPdf = new OpenPdf(paintArea.getWidth(),paintArea.getHeight());
+
+                openedPdfFileName = bundle.getString("file");
+                if(openedPdfFileName != null){
+                    Log.e("BigWhite", "open pdf file is " + openedPdfFileName);
+                    System.out.println("选择文件为：" + openedPdfFileName);
+                    openPdf.openRenderer(openedPdfFileName);
+
+                    if(openPdf.pdfBitmap != null)
+                    {
+                        baseBitmap = openPdf.pdfBitmap;
+                        canvas = new Canvas(baseBitmap);
+                        //paintArea.setImageBitmap(baseBitmap);
+                    }
+
+                    //openPdf.updateView(CurrentView.READ_LAYOUT);
+
+                }else {
+                    Toast.makeText(getApplicationContext(),
+                            "No pdf file found, Please create new Pdf file",
+                            Toast.LENGTH_LONG).show();
+                    //updateView(CurrentView.OPTIONS_LAYOUT);
+                   // updateActionBarText();
+                }
             }
         }
     }
