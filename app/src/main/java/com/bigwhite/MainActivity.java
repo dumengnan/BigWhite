@@ -2,11 +2,13 @@ package com.bigwhite;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -20,7 +22,7 @@ import android.widget.PopupWindow;
 
 public class MainActivity extends Activity {
 
-    private static final int REQ_SEL_PAGE = 0;
+    private static final int FILE_RESULT_CODE = 1;
     private PopupWindow mPopupWindow;
     private LayoutInflater mLayoutInflater;
 
@@ -135,7 +137,10 @@ public class MainActivity extends Activity {
 
         mColor = (ImageView) findViewById(R.id.color);//颜色框
 
+        mNewPage = (ImageView) findViewById(R.id.new_page); //加载背景ppt word pdf
+
         drawView = new DrawView(this);
+
         paint = new Paint();
 
     }
@@ -153,6 +158,7 @@ public class MainActivity extends Activity {
                 mEdit.setSelected(true);  //设置当前点击的按钮变色
                 mEraser.setSelected(false);
                 mClear.setSelected(false);
+                mNewPage.setSelected(false);
 
                 mPopupWindow.setContentView(popupView); //将笔迹宽度放入对话框中
                 mPopupWindow.setWidth(POP_WINDOW_WIDTH);
@@ -211,6 +217,7 @@ public class MainActivity extends Activity {
                 mClear.setSelected(true); //设置当前点击的按钮变色
                 mEdit.setSelected(false);
                 mEraser.setSelected(false);
+                mNewPage.setSelected(false);
 
                 if(baseBitmap != null)
                 {
@@ -239,6 +246,7 @@ public class MainActivity extends Activity {
                 mEraser.setSelected(false);
                 mEdit.setSelected(false);
                 mClear.setSelected(false);
+                mNewPage.setSelected(false);
 
                 mPopupWindow.setContentView(popupView);
                 mPopupWindow.setWidth(POP_WINDOW_WIDTH);
@@ -303,7 +311,32 @@ public class MainActivity extends Activity {
 
     private void initNewPage()
     {
+        mNewPage.setOnClickListener(new View.OnClickListener()
+        {
+            public void onClick(View paramView)
+            {
+                mNewPage.setSelected(true);
+                mClear.setSelected(false);
+                mEdit.setSelected(false);
+                mEraser.setSelected(false);
 
+                //加载文件管理器界面
+                Log.e("BigWhite","list file from sdcard to choose");
+                Intent intent = new Intent(MainActivity.this,FileManagerActivity.class);
+                startActivityForResult(intent,FILE_RESULT_CODE);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(FILE_RESULT_CODE == requestCode){
+            Bundle bundle = null;
+            if(data!=null&&(bundle=data.getExtras())!=null){
+                Log.e("BigWhite","select folder is " + bundle.getString("file"));
+               // textView.setText("选择文件夹为："+bundle.getString("file"));
+            }
+        }
     }
 
     private void initEraser()
@@ -320,6 +353,7 @@ public class MainActivity extends Activity {
                 mEraser.setSelected(true);//设置当前点击的按钮变色
                 mEdit.setSelected(false);
                 mClear.setSelected(false);
+                mNewPage.setSelected(false);
 
                 mPopupWindow.setContentView(eraser_popupView); //将橡皮宽度放入对话框中
                 mPopupWindow.setWidth(POP_WINDOW_WIDTH);
