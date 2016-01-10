@@ -18,16 +18,7 @@ import android.view.View;
 public class DrawView extends View {
 
     protected float mPenWidth = 1f;//笔迹宽度初始值
-    protected int mEraserWidth = 10;//橡皮擦宽度初始值
     protected int mColor = Color.BLACK;
-
-    public int getmEraserWidth() {
-        return mEraserWidth;
-    }
-
-    public void setmEraserWidth(int mEraserWidth) {
-        this.mEraserWidth = mEraserWidth;
-    }
 
     public int getmColor() {
         return mColor;

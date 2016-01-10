@@ -7,10 +7,12 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Xfermode;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.Image;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -19,7 +21,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -44,18 +45,22 @@ public class MainActivity extends Activity {
     private DrawView drawView;
     private Bitmap baseBitmap;
     private Canvas canvas;
-    private Canvas tempCanvas;
     private Paint paint;
+
+    private Xfermode fermode;
 
     float startX;
     float startY;
+
+    private Drawable drawable;
+    private Bitmap  image;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.e("BigWhite", "MainActivity oncreate");
         setContentView(R.layout.activity_main);
-
+        getWindow().setBackgroundDrawableResource(R.drawable.ic_eraser);
         initView();//界面相关组件初始化
         initPenSize();//画笔宽度设置监听初始化
         initClear(); //一键清除功能初始化
@@ -63,12 +68,18 @@ public class MainActivity extends Activity {
         initColor();//颜色选择初始化
         initEraser();
     }
+
+    public static Drawable BitmapConvertToDrawale(Bitmap bitmap) {
+// Bitmap bitmap = new Bitmap();
+        Drawable drawable = new BitmapDrawable(bitmap);
+        return drawable;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
         //根据之前选择的笔迹宽度，以及笔迹颜色进行处理
         paint.setStrokeWidth(drawView.getmPenWidth());
-        paint.setColor(drawView.getmColor());
 
         switch (event.getAction())
         {
@@ -77,8 +88,9 @@ public class MainActivity extends Activity {
                 {
                     baseBitmap = Bitmap.createBitmap(paintArea.getWidth(),
                             paintArea.getHeight(),Bitmap.Config.ARGB_8888);
+                    baseBitmap.eraseColor(Color.TRANSPARENT);
                     canvas = new Canvas(baseBitmap);
-                    canvas.drawColor(Color.WHITE);
+                    canvas.drawColor(Color.TRANSPARENT);
                 }
                 startX = event.getX();
                 startY = event.getY();
@@ -104,6 +116,7 @@ public class MainActivity extends Activity {
         }
         return true;
     }
+
     @Override
     protected void onPause()
     {
@@ -137,6 +150,7 @@ public class MainActivity extends Activity {
         drawView = new DrawView(this);
 
         paint = new Paint();
+        fermode=paint.getXfermode();
 
     }
     private void initPenSize()
@@ -182,22 +196,29 @@ public class MainActivity extends Activity {
         });
         //监听选中的笔迹宽度
         width1.setOnClickListener(new View.OnClickListener() {
-        public void onClick(View v) {
+            public void onClick(View v) {
             drawView.setmPenWidth(1f);
+            paint.setColor(drawView.getmColor());
+            paint.setAlpha(255);
+            paint.setXfermode(fermode);
             mPopupWindow.dismiss();
         }
     });
         width2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 drawView.setmPenWidth(3f);
-                Log.e("BigWhite", "selected 3f pen size");
+                paint.setColor(drawView.getmColor());
+                paint.setAlpha(255);
+                paint.setXfermode(fermode);
                 mPopupWindow.dismiss();
             }
         });
         width3.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 drawView.setmPenWidth(6f);
-                Log.e("BigWhite", "selected 6f pen size");
+                paint.setColor(drawView.getmColor());
+                paint.setAlpha(255);
+                paint.setXfermode(fermode);
                 mPopupWindow.dismiss();
             }
         });
@@ -219,8 +240,9 @@ public class MainActivity extends Activity {
                     baseBitmap = Bitmap.createBitmap(paintArea.getWidth(),
                             paintArea.getHeight(), Bitmap.Config.ARGB_8888);
 
+                    baseBitmap.eraseColor(Color.TRANSPARENT);
                     canvas = new Canvas(baseBitmap);
-                    canvas.drawColor(Color.WHITE);
+                    canvas.drawColor(Color.TRANSPARENT);
                     paintArea.setImageBitmap(baseBitmap);
                 }
             }
@@ -266,6 +288,7 @@ public class MainActivity extends Activity {
         mColorWhite.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 drawView.setmColor(Color.WHITE);
+                paint.setColor(drawView.getmColor());
                 mPopupWindow.dismiss();
                 mColor.setBackgroundColor(Color.WHITE);
             }
@@ -275,6 +298,7 @@ public class MainActivity extends Activity {
             public void onClick(View v)
             {
                 drawView.setmColor(Color.BLUE);
+                paint.setColor(drawView.getmColor());
                 mPopupWindow.dismiss();
                 mColor.setBackgroundColor(Color.BLUE);
             }
@@ -282,6 +306,7 @@ public class MainActivity extends Activity {
         mColorGreen.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 drawView.setmColor(Color.GREEN);
+                paint.setColor(drawView.getmColor());
                 mPopupWindow.dismiss();
                 mColor.setBackgroundColor(Color.GREEN);
             }
@@ -291,6 +316,7 @@ public class MainActivity extends Activity {
             public void onClick(View v)
             {
                 drawView.setmColor(Color.RED);
+                paint.setColor(drawView.getmColor());
                 mPopupWindow.dismiss();
                 mColor.setBackgroundColor(Color.RED);
             }
@@ -298,6 +324,7 @@ public class MainActivity extends Activity {
         mColorYellow.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 drawView.setmColor(Color.YELLOW);
+                paint.setColor(drawView.getmColor());
                 mPopupWindow.dismiss();
                 mColor.setBackgroundColor(Color.YELLOW);
             }
@@ -352,9 +379,12 @@ public class MainActivity extends Activity {
                         System.out.println("选择图片为：" + openedPdfFileName);
                         openPdf.openPicture(openedPdfFileName,paintArea.getWidth(),paintArea.getHeight());
 
-                        baseBitmap = openPdf.image;
-                        canvas = new Canvas(baseBitmap);
-                        paintArea.setImageBitmap(openPdf.image);
+                        drawable = BitmapConvertToDrawale(openPdf.image);
+                        getWindow().setBackgroundDrawable(drawable);
+
+                        //baseBitmap = openPdf.image;
+                        //canvas = new Canvas(baseBitmap);
+                        //paintArea.setImageBitmap(openPdf.image);
                     }
                 }else {
                     Toast.makeText(getApplicationContext(),
@@ -391,17 +421,17 @@ public class MainActivity extends Activity {
                 mPopupWindow.showAtLocation(mEraser, Gravity.LEFT | Gravity.TOP, mToolbox.getRight(), mToolbox.getTop()
                         + mEraser.getTop() - (int) (getResources().getDisplayMetrics().density * 5 + 0.5f));
 
-                float eraserSize = drawView.getmEraserWidth(); //默认的橡皮擦宽度10
+                float eraserSize = drawView.getmPenWidth(); //默认的橡皮擦宽度1
 
-                if (eraserSize == 10) {
+                if (eraserSize == 1) {
                     eraser_width1.setSelected(true);
                     eraser_width2.setSelected(false);
                     eraser_width3.setSelected(false);
-                } else if (eraserSize == 20) {
+                } else if (eraserSize == 3) {
                     eraser_width1.setSelected(false);
                     eraser_width2.setSelected(true);
                     eraser_width3.setSelected(false);
-                } else if (eraserSize == 30) {
+                } else if (eraserSize == 6) {
                     eraser_width1.setSelected(false);
                     eraser_width2.setSelected(false);
                     eraser_width3.setSelected(true);
@@ -411,21 +441,30 @@ public class MainActivity extends Activity {
         //监听选中的橡皮擦宽度
         eraser_width1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                drawView.setmEraserWidth(10);
+                drawView.setmPenWidth(1f);
+                mEraser.setSelected(true);
+                paint.setAlpha(0);
+                paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
                 mPopupWindow.dismiss();
             }
         });
         eraser_width2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                drawView.setmEraserWidth(20);
+                drawView.setmPenWidth(3f);
                 Log.e("BigWhite", "selected 3f pen size");
+                mEraser.setSelected(true);
+                paint.setAlpha(0);
+                paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
                 mPopupWindow.dismiss();
             }
         });
         eraser_width3.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                drawView.setmEraserWidth(30);
+                drawView.setmPenWidth(6f);
                 Log.e("BigWhite", "selected 6f pen size");
+                mEraser.setSelected(true);
+                paint.setAlpha(0);
+                paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
                 mPopupWindow.dismiss();
             }
         });
