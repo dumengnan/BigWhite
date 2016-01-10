@@ -35,6 +35,7 @@
             android:layout_width="1dip"
             android:layout_height="match_parent"
             android:layout_alignRight="@id/container"
+            android:textColor="#000000"
             android:visibility="gone" />
 
     </RelativeLayout>
@@ -108,7 +109,6 @@
         android:padding="5dip" >
 
 
-
         <ImageView
             android:id="@+id/undo"
             android:layout_width="50dip"
@@ -135,7 +135,6 @@
             android:padding="3dip"
             android:scaleType="center"
             android:src="@drawable/ic_redo" />
-
 
         <ImageView
             android:id="@+id/new_page"

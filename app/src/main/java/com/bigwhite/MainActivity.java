@@ -13,6 +13,7 @@ import android.graphics.Xfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Layout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -20,7 +21,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -43,8 +46,9 @@ public class MainActivity extends Activity {
     private ImageView mNewPage;
     private ImageView pageup;
     private ImageView pagedown;
-    private ImageView pagenumber;
+    private TextView pagenumber;
     private ImageView pageclose;
+
 
     private ImageView paintArea;
     private DrawView drawView;
@@ -58,7 +62,8 @@ public class MainActivity extends Activity {
     float startY;
 
     private Drawable drawable;
-    private Bitmap image;
+
+    private OpenPdf openPdf;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +77,8 @@ public class MainActivity extends Activity {
         initNewPage();//加载背景（eg.word ppt pdf）
         initColor();//颜色选择初始化
         initEraser();
+        initpageup();
+        initpagedown();
 
         initPageClose();
     }
@@ -90,7 +97,8 @@ public class MainActivity extends Activity {
             case MotionEvent.ACTION_DOWN:
                 if (baseBitmap == null) {
                     baseBitmap = Bitmap.createBitmap(paintArea.getWidth(),
-                            paintArea.getHeight(), Bitmap.Config.ARGB_8888);
+                            paintArea.getHeight(),Bitmap.Config.ARGB_8888);
+
                     baseBitmap.eraseColor(Color.TRANSPARENT);
                     canvas = new Canvas(baseBitmap);
                     canvas.drawColor(Color.TRANSPARENT);
@@ -155,6 +163,13 @@ public class MainActivity extends Activity {
         mColor = (ImageView) findViewById(R.id.color);//颜色框
 
         mNewPage = (ImageView) findViewById(R.id.new_page); //加载背景ppt word pdf
+
+        pagenumber = (TextView) findViewById(R.id.pagenumber);
+
+        pageup = (ImageView) findViewById(R.id.undo);
+
+        pagedown = (ImageView) findViewById(R.id.redo);
+
 
         pageclose = (ImageView) findViewById(R.id.page);
 
@@ -358,6 +373,34 @@ public class MainActivity extends Activity {
         });
     }
 
+    private void initpageup()
+    {
+        pageup.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View paramView) {
+                openPdf.pageup();
+                if(openPdf.pdfBitmap != null)
+                {
+                    drawable = BitmapConvertToDrawale(openPdf.pdfBitmap);
+                    getWindow().setBackgroundDrawable(drawable);
+                }
+            }
+        });
+    }
+
+    private void initpagedown()
+    {
+        pagedown.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View paramView) {
+                openPdf.pagedown();
+                if(openPdf.pdfBitmap != null)
+                {
+                    drawable = BitmapConvertToDrawale(openPdf.pdfBitmap);
+                    getWindow().setBackgroundDrawable(drawable);
+                }
+            }
+        });
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -368,14 +411,18 @@ public class MainActivity extends Activity {
                 Log.e("BigWhite", "select foleder file name is " + bundle.getString("file"));
                 // textView.setText("选择文件夹为："+bundle.getString("file"));
                 String openedPdfFileName;
-                OpenPdf openPdf = new OpenPdf(paintArea.getWidth(), paintArea.getHeight());
+                OpenPdf openPdf = new OpenPdf(paintArea.getWidth(),paintArea.getHeight());
+
+                openPdf = new OpenPdf(paintArea.getWidth(),paintArea.getHeight());
 
                 openedPdfFileName = bundle.getString("file");
                 if (openedPdfFileName != null) {
 
                     Log.e("BigWhite", "open pdf file is " + openedPdfFileName);
 
-                    if (resultCode == 2) {
+                    if(resultCode == 2){
+
+                        pagenumber.setText("1");
                         System.out.println("选择文件为：" + openedPdfFileName);
                         openPdf.openRenderer(openedPdfFileName);
 
