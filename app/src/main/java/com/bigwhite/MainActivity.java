@@ -44,6 +44,7 @@ public class MainActivity extends Activity {
     private DrawView drawView;
     private Bitmap baseBitmap;
     private Canvas canvas;
+    private Canvas tempCanvas;
     private Paint paint;
 
     float startX;
@@ -334,19 +335,27 @@ public class MainActivity extends Activity {
 
                 openedPdfFileName = bundle.getString("file");
                 if(openedPdfFileName != null){
+
                     Log.e("BigWhite", "open pdf file is " + openedPdfFileName);
-                    System.out.println("选择文件为：" + openedPdfFileName);
-                    openPdf.openRenderer(openedPdfFileName);
 
-                    if(openPdf.pdfBitmap != null)
-                    {
-                        baseBitmap = openPdf.pdfBitmap;
+                    if(resultCode == 2){
+                        System.out.println("选择文件为：" + openedPdfFileName);
+                        openPdf.openRenderer(openedPdfFileName);
+
+                        if(openPdf.pdfBitmap != null)
+                        {
+                            baseBitmap = openPdf.pdfBitmap;
+                            canvas = new Canvas(baseBitmap);
+                            paintArea.setImageBitmap(openPdf.pdfBitmap);
+                        }
+                    }else if(resultCode == 3){
+                        System.out.println("选择图片为：" + openedPdfFileName);
+                        openPdf.openPicture(openedPdfFileName,paintArea.getWidth(),paintArea.getHeight());
+
+                        baseBitmap = openPdf.image;
                         canvas = new Canvas(baseBitmap);
-                        //paintArea.setImageBitmap(baseBitmap);
+                        paintArea.setImageBitmap(openPdf.image);
                     }
-
-                    //openPdf.updateView(CurrentView.READ_LAYOUT);
-
                 }else {
                     Toast.makeText(getApplicationContext(),
                             "No pdf file found, Please create new Pdf file",

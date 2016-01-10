@@ -24,6 +24,7 @@ public class FileManagerActivity extends ListActivity{
     private String curPath = Environment.getExternalStorageDirectory().getPath();
     private TextView mPath;
     private String filepath = null;
+    private int ret=0;
 
     @Override
     protected void onCreate(Bundle icicle) {
@@ -42,7 +43,7 @@ public class FileManagerActivity extends ListActivity{
                     Bundle bundle = new Bundle();
                     bundle.putString("file", filepath);
                     data.putExtras(bundle);
-                    setResult(2, data);
+                    setResult(ret, data);
                     finish();
                 }
             }
@@ -90,6 +91,11 @@ public class FileManagerActivity extends ListActivity{
             String fname = file.getName();
             String end = file.getName().substring(fname.lastIndexOf(".")+1,fname.length());
             if(end.equals("pdf")){
+                ret = 2;
+                filepath = curPath+"/"+file.getName();
+            }else if(end.equals("jpg") || end.equals("gif") || end.equals("png")
+                    || end.equals("jpeg") || end.equals("bmp")){
+                ret = 3;
                 filepath = curPath+"/"+file.getName();
             }
         }
