@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.pdf.PdfRenderer;
 import android.os.ParcelFileDescriptor;
-import android.widget.ImageView;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,7 +16,7 @@ import java.lang.ref.WeakReference;
  */
 public class OpenPdf {
 
-    private static int currentPage = 0;
+    private int currentPage = 0;
 
     public Bitmap pdfBitmap;
     public Bitmap image;
@@ -35,8 +35,12 @@ public class OpenPdf {
 
     }
 
-    public static int getCurrentPage() {
+    public int getCurrentPage() {
         return currentPage;
+    }
+
+    public int gettotalpage(){
+        return mPdfRenderer.getPageCount();
     }
     /**
      * API for initializing file descriptor and pdf renderer after selecting pdf from list
@@ -59,11 +63,13 @@ public class OpenPdf {
     }
 
     public void pageup(){
+        Log.e("BigWhite", "" + currentPage);
         currentPage++;
         showPage(currentPage);
     }
 
     public void pagedown(){
+        Log.e("BigWhite", "" + currentPage);
         currentPage--;
         showPage(currentPage);
     }
@@ -113,6 +119,7 @@ public class OpenPdf {
         //Set rendered bitmap to ImageView
        // pdfView.setImageBitmap(bitmap);
     }
+
     public void openPicture(String path, int w, int h) {
         if(image != null){
             image = null;

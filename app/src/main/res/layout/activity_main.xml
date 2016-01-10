@@ -116,7 +116,8 @@
             android:background="@drawable/page_selector"
             android:padding="3dip"
             android:scaleType="center"
-            android:src="@drawable/ic_undo" />
+            android:src="@drawable/ic_undo"
+            android:visibility="gone"/>
 
 
         <TextView
@@ -125,7 +126,8 @@
             android:textAlignment="center"
             android:textSize="30sp"
             android:text="1"
-            android:id="@+id/pagenumber" />
+            android:id="@+id/pagenumber"
+            android:visibility="gone"/>
 
         <ImageView
             android:id="@+id/redo"
@@ -134,7 +136,8 @@
             android:background="@drawable/page_selector"
             android:padding="3dip"
             android:scaleType="center"
-            android:src="@drawable/ic_redo" />
+            android:src="@drawable/ic_redo"
+            android:visibility="gone"/>
 
         <ImageView
             android:id="@+id/new_page"

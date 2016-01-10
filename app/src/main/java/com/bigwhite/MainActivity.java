@@ -13,7 +13,6 @@ import android.graphics.Xfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.text.Layout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -21,7 +20,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -79,7 +77,6 @@ public class MainActivity extends Activity {
         initEraser();
         initpageup();
         initpagedown();
-
         initPageClose();
     }
 
@@ -373,34 +370,70 @@ public class MainActivity extends Activity {
         });
     }
 
+    //向上翻页
     private void initpageup()
     {
+
         pageup.setOnClickListener(new View.OnClickListener() {
             public void onClick(View paramView) {
-                openPdf.pageup();
-                if(openPdf.pdfBitmap != null)
-                {
-                    drawable = BitmapConvertToDrawale(openPdf.pdfBitmap);
-                    getWindow().setBackgroundDrawable(drawable);
+                int ret = openPdf.getCurrentPage();
+                if(ret != 0) {
+                    Log.e("BigWhite", "*****************1");
+                    mClear.performClick();
+                    openPdf.pagedown();
+                    Log.e("BigWhite", "*****************3");
+                    if (openPdf.pdfBitmap != null) {
+                        drawable = BitmapConvertToDrawale(openPdf.pdfBitmap);
+                        getWindow().setBackgroundDrawable(drawable);
+                    }
+                    ret = openPdf.getCurrentPage();
+                    pagenumber.setText(""+(ret+1));
                 }
             }
         });
     }
 
+    //向下翻页
     private void initpagedown()
     {
         pagedown.setOnClickListener(new View.OnClickListener() {
             public void onClick(View paramView) {
-                openPdf.pagedown();
-                if(openPdf.pdfBitmap != null)
-                {
-                    drawable = BitmapConvertToDrawale(openPdf.pdfBitmap);
-                    getWindow().setBackgroundDrawable(drawable);
+                int cur_page = openPdf.getCurrentPage();
+                int tot_page = openPdf.gettotalpage();
+                Log.e("Bigwhite","***************"+tot_page);
+                if(cur_page + 2 <= tot_page ){
+                    Log.e("BigWhite","*****************2");
+                    mClear.performClick();
+                    openPdf.pageup();
+                    Log.e("BigWhite", "*****************4");
+                    if(openPdf.pdfBitmap != null)
+                    {
+                        drawable = BitmapConvertToDrawale(openPdf.pdfBitmap);
+                        getWindow().setBackgroundDrawable(drawable);
+                    }
+                    cur_page = openPdf.getCurrentPage();
+                    pagenumber.setText(""+(cur_page + 1));
                 }
+
             }
         });
     }
 
+    //显示上下翻页和当前页数
+    private void showtools(){
+        pageup.setVisibility(View.VISIBLE);
+        pagedown.setVisibility(View.VISIBLE);
+        pagenumber.setVisibility(View.VISIBLE);
+        pagenumber.setText("1");
+    }
+
+    //屏蔽上下翻页和当前页数
+    private void closetools(){
+        pageup.setVisibility(View.INVISIBLE);
+        pagedown.setVisibility(View.INVISIBLE);
+        pagenumber.setVisibility(View.INVISIBLE);
+        pagenumber.setText("1");
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -411,10 +444,8 @@ public class MainActivity extends Activity {
                 Log.e("BigWhite", "select foleder file name is " + bundle.getString("file"));
                 // textView.setText("选择文件夹为："+bundle.getString("file"));
                 String openedPdfFileName;
-                OpenPdf openPdf = new OpenPdf(paintArea.getWidth(),paintArea.getHeight());
-
                 openPdf = new OpenPdf(paintArea.getWidth(),paintArea.getHeight());
-
+                Log.e("BigWhite","***********************"+openPdf.getCurrentPage());
                 openedPdfFileName = bundle.getString("file");
                 if (openedPdfFileName != null) {
 
@@ -422,7 +453,7 @@ public class MainActivity extends Activity {
 
                     if(resultCode == 2){
 
-                        pagenumber.setText("1");
+                        showtools();
                         System.out.println("选择文件为：" + openedPdfFileName);
                         openPdf.openRenderer(openedPdfFileName);
 
@@ -529,6 +560,7 @@ public class MainActivity extends Activity {
                 getWindow().setBackgroundDrawable(drawable);
 
                 mClear.performClick();
+                closetools();
             }
         });
     }
