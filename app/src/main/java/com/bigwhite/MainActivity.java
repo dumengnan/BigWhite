@@ -35,11 +35,16 @@ public class MainActivity extends Activity {
     private ImageView mColorGreen;
     private ImageView mColorRed;
     private ImageView mColorYellow;
+    private ImageView mColorBlack;
     private ImageView mColor;
     private ImageView mEdit;
     private ImageView mEraser;
     private ImageView mClear;
     private ImageView mNewPage;
+    private ImageView pageup;
+    private ImageView pagedown;
+    private ImageView pagenumber;
+    private ImageView pageclose;
 
     private ImageView paintArea;
     private DrawView drawView;
@@ -60,7 +65,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         Log.e("BigWhite", "MainActivity oncreate");
         setContentView(R.layout.activity_main);
-        getWindow().setBackgroundDrawableResource(R.drawable.ic_eraser);
+
         initView();//界面相关组件初始化
         initPenSize();//画笔宽度设置监听初始化
         initClear(); //一键清除功能初始化
@@ -70,7 +75,6 @@ public class MainActivity extends Activity {
     }
 
     public static Drawable BitmapConvertToDrawale(Bitmap bitmap) {
-// Bitmap bitmap = new Bitmap();
         Drawable drawable = new BitmapDrawable(bitmap);
         return drawable;
     }
@@ -128,6 +132,13 @@ public class MainActivity extends Activity {
         mLayoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         paintArea = (ImageView) findViewById(R.id.paint_area);
+
+        //创建起始白色背景图片
+        Bitmap bitmap = MainApplication.createBitmap(MainApplication.SCREEN_WIDTH,MainApplication.SCREEN_HEIGHT);
+        bitmap.eraseColor(Color.WHITE);
+        drawable = BitmapConvertToDrawale(bitmap);
+        getWindow().setBackgroundDrawable(drawable);
+
 
         //产生一个对话框，里面存放要选择的笔迹宽度以及笔迹颜色等
         mPopupWindow = new PopupWindow(new View(this));
@@ -245,6 +256,7 @@ public class MainActivity extends Activity {
                     canvas.drawColor(Color.TRANSPARENT);
                     paintArea.setImageBitmap(baseBitmap);
                 }
+                mClear.setSelected(false);
             }
         });
     }
@@ -284,6 +296,8 @@ public class MainActivity extends Activity {
         mColorRed.setBackgroundColor(Color.RED);
         mColorYellow = (ImageView) popupView.findViewById(R.id.color_yellow);
         mColorYellow.setBackgroundColor(Color.YELLOW);
+        mColorBlack = (ImageView) popupView.findViewById(R.id.color_black);
+        mColorBlack.setBackgroundColor(Color.BLACK);
 
         mColorWhite.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -329,6 +343,14 @@ public class MainActivity extends Activity {
                 mColor.setBackgroundColor(Color.YELLOW);
             }
         });
+        mColorBlack.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                drawView.setmColor(Color.BLACK);
+                paint.setColor(drawView.getmColor());
+                mPopupWindow.dismiss();
+                mColor.setBackgroundColor(Color.BLACK);
+            }
+        });
     }
 
     private void initNewPage()
@@ -371,9 +393,8 @@ public class MainActivity extends Activity {
 
                         if(openPdf.pdfBitmap != null)
                         {
-                            baseBitmap = openPdf.pdfBitmap;
-                            canvas = new Canvas(baseBitmap);
-                            paintArea.setImageBitmap(openPdf.pdfBitmap);
+                            drawable = BitmapConvertToDrawale(openPdf.pdfBitmap);
+                            getWindow().setBackgroundDrawable(drawable);
                         }
                     }else if(resultCode == 3){
                         System.out.println("选择图片为：" + openedPdfFileName);
@@ -382,16 +403,11 @@ public class MainActivity extends Activity {
                         drawable = BitmapConvertToDrawale(openPdf.image);
                         getWindow().setBackgroundDrawable(drawable);
 
-                        //baseBitmap = openPdf.image;
-                        //canvas = new Canvas(baseBitmap);
-                        //paintArea.setImageBitmap(openPdf.image);
                     }
                 }else {
                     Toast.makeText(getApplicationContext(),
                             "No pdf file found, Please create new Pdf file",
                             Toast.LENGTH_LONG).show();
-                    //updateView(CurrentView.OPTIONS_LAYOUT);
-                   // updateActionBarText();
                 }
             }
         }

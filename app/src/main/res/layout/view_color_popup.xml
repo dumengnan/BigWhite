@@ -37,5 +37,11 @@
         android:layout_height="50dip"
         android:layout_marginLeft="3dip"
         android:background="@color/solid_blue" />
+    <ImageView
+        android:id="@+id/color_black"
+        android:layout_width="50dip"
+        android:layout_height="50dip"
+        android:layout_marginLeft="3dip"
+        android:background="@color/solid_black" />
 
 </LinearLayout>

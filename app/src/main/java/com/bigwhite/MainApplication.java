@@ -3,6 +3,7 @@ package com.bigwhite;
 import android.app.Application;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -46,7 +47,7 @@ public class MainApplication extends Application {
         CANVAS_WIDTH = MainApplication.SCREEN_WIDTH;
         CANVAS_HEIGHT = (int) (MainApplication.SCREEN_WIDTH / scale);
 
-        createPage(); //创建新的画布.
+       // createPage(); //创建新的画布.
     }
     public static String getBitmapName()
     {
@@ -63,16 +64,11 @@ public class MainApplication extends Application {
         return curBitmap;
     }
 
-    //创建新的bitmap页面
-    public static void createPage()
-    {
-        curBitmap = createBitmap();
-    }
     //生成新的bitmap
-    private static Bitmap createBitmap()
+    public static Bitmap createBitmap(int width, int height)
     {
-        Bitmap bitmap = Bitmap.createBitmap(CANVAS_WIDTH,CANVAS_HEIGHT,Bitmap.Config.ARGB_8888);
-        bitmap.eraseColor(Constants.BACK_COLOR);
+        Bitmap bitmap = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888);
+        //bitmap.eraseColor(Color.WHITE);
         Log.e("BigWhite","createBitmap success");
         return bitmap;
     }
@@ -87,7 +83,7 @@ public class MainApplication extends Application {
         }
 
         //新增
-        sourceBitmap = createBitmap();
+      //  sourceBitmap = createBitmap();
         Canvas canvas = new Canvas(sourceBitmap);
         canvas.drawBitmap(backImg, 0, 0, null);
 
@@ -102,7 +98,7 @@ public class MainApplication extends Application {
             sourceBitmap.recycle();
             sourceBitmap = null;
         }
-        curBitmap = createBitmap();
+       // curBitmap = createBitmap();
         return curBitmap;
     }
 
