@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
     float startY;
 
     private Drawable drawable;
-    private Bitmap  image;
+    private Bitmap image;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +72,8 @@ public class MainActivity extends Activity {
         initNewPage();//加载背景（eg.word ppt pdf）
         initColor();//颜色选择初始化
         initEraser();
+
+        initPageClose();
     }
 
     public static Drawable BitmapConvertToDrawale(Bitmap bitmap) {
@@ -80,18 +82,15 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event)
-    {
+    public boolean onTouchEvent(MotionEvent event) {
         //根据之前选择的笔迹宽度，以及笔迹颜色进行处理
         paint.setStrokeWidth(drawView.getmPenWidth());
 
-        switch (event.getAction())
-        {
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if(baseBitmap == null)
-                {
+                if (baseBitmap == null) {
                     baseBitmap = Bitmap.createBitmap(paintArea.getWidth(),
-                            paintArea.getHeight(),Bitmap.Config.ARGB_8888);
+                            paintArea.getHeight(), Bitmap.Config.ARGB_8888);
                     baseBitmap.eraseColor(Color.TRANSPARENT);
                     canvas = new Canvas(baseBitmap);
                     canvas.drawColor(Color.TRANSPARENT);
@@ -104,7 +103,7 @@ public class MainActivity extends Activity {
                 float stopX = event.getX();
                 float stopY = event.getY();
 
-                canvas.drawLine(startX,startY,stopX,stopY,paint);
+                canvas.drawLine(startX, startY, stopX, stopY, paint);
 
                 startX = event.getX();
                 startY = event.getY();
@@ -122,19 +121,18 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onPause()
-    {
+    protected void onPause() {
         super.onPause();
     }
-    private void initView()
-    {
+
+    private void initView() {
         //获得xml文件里定义的view
         mLayoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         paintArea = (ImageView) findViewById(R.id.paint_area);
 
         //创建起始白色背景图片
-        Bitmap bitmap = MainApplication.createBitmap(MainApplication.SCREEN_WIDTH,MainApplication.SCREEN_HEIGHT);
+        Bitmap bitmap = MainApplication.createBitmap(MainApplication.SCREEN_WIDTH, MainApplication.SCREEN_HEIGHT);
         bitmap.eraseColor(Color.WHITE);
         drawable = BitmapConvertToDrawale(bitmap);
         getWindow().setBackgroundDrawable(drawable);
@@ -158,17 +156,19 @@ public class MainActivity extends Activity {
 
         mNewPage = (ImageView) findViewById(R.id.new_page); //加载背景ppt word pdf
 
+        pageclose = (ImageView) findViewById(R.id.page);
+
         drawView = new DrawView(this);
 
         paint = new Paint();
-        fermode=paint.getXfermode();
+        fermode = paint.getXfermode();
 
     }
-    private void initPenSize()
-    {
+
+    private void initPenSize() {
         final int POP_WINDOW_WIDTH = WindowManager.LayoutParams.WRAP_CONTENT;
-        final int POP_WINDOW_HEIGHT = (int) (getResources().getDisplayMetrics().density *60 + 0.5f);
-        final View popupView = mLayoutInflater.inflate(R.layout.view_popup_pen,null);
+        final int POP_WINDOW_HEIGHT = (int) (getResources().getDisplayMetrics().density * 60 + 0.5f);
+        final View popupView = mLayoutInflater.inflate(R.layout.view_popup_pen, null);
         final View width1 = popupView.findViewById(R.id.pen_width1);
         final View width2 = popupView.findViewById(R.id.pen_width2);
         final View width3 = popupView.findViewById(R.id.pen_width3);
@@ -208,13 +208,13 @@ public class MainActivity extends Activity {
         //监听选中的笔迹宽度
         width1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            drawView.setmPenWidth(1f);
-            paint.setColor(drawView.getmColor());
-            paint.setAlpha(255);
-            paint.setXfermode(fermode);
-            mPopupWindow.dismiss();
-        }
-    });
+                drawView.setmPenWidth(1f);
+                paint.setColor(drawView.getmColor());
+                paint.setAlpha(255);
+                paint.setXfermode(fermode);
+                mPopupWindow.dismiss();
+            }
+        });
         width2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 drawView.setmPenWidth(3f);
@@ -235,19 +235,15 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void initClear()
-    {
-        mClear.setOnClickListener(new View.OnClickListener()
-        {
-            public void onClick(View paramView)
-            {
+    private void initClear() {
+        mClear.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View paramView) {
                 mClear.setSelected(true); //设置当前点击的按钮变色
                 mEdit.setSelected(false);
                 mEraser.setSelected(false);
                 mNewPage.setSelected(false);
 
-                if(baseBitmap != null)
-                {
+                if (baseBitmap != null) {
                     baseBitmap = Bitmap.createBitmap(paintArea.getWidth(),
                             paintArea.getHeight(), Bitmap.Config.ARGB_8888);
 
@@ -261,17 +257,14 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void initColor()
-    {
+    private void initColor() {
         final int POP_WINDOW_WIDTH = WindowManager.LayoutParams.WRAP_CONTENT;
-        final int POP_WINDOW_HEIGHT = (int) (getResources().getDisplayMetrics().density*60 + 0.5f);
+        final int POP_WINDOW_HEIGHT = (int) (getResources().getDisplayMetrics().density * 60 + 0.5f);
         final View popupView = mLayoutInflater.inflate(R.layout.view_color_popup, null);
         final View colorFrame = findViewById(R.id.color_frame);
 
-        colorFrame.setOnClickListener(new View.OnClickListener()
-        {
-            public void onClick(View paramView)
-            {
+        colorFrame.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View paramView) {
                 mEraser.setSelected(false);
                 mEdit.setSelected(false);
                 mClear.setSelected(false);
@@ -307,10 +300,8 @@ public class MainActivity extends Activity {
                 mColor.setBackgroundColor(Color.WHITE);
             }
         });
-        mColorBlue.setOnClickListener(new View.OnClickListener()
-        {
-            public void onClick(View v)
-            {
+        mColorBlue.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
                 drawView.setmColor(Color.BLUE);
                 paint.setColor(drawView.getmColor());
                 mPopupWindow.dismiss();
@@ -325,10 +316,8 @@ public class MainActivity extends Activity {
                 mColor.setBackgroundColor(Color.GREEN);
             }
         });
-        mColorRed.setOnClickListener(new View.OnClickListener()
-        {
-            public void onClick(View v)
-            {
+        mColorRed.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
                 drawView.setmColor(Color.RED);
                 paint.setColor(drawView.getmColor());
                 mPopupWindow.dismiss();
@@ -353,58 +342,56 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void initNewPage()
-    {
-        mNewPage.setOnClickListener(new View.OnClickListener()
-        {
-            public void onClick(View paramView)
-            {
+    private void initNewPage() {
+        mNewPage.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View paramView) {
                 mNewPage.setSelected(true);
                 mClear.setSelected(false);
                 mEdit.setSelected(false);
                 mEraser.setSelected(false);
 
                 //加载文件管理器界面
-                Log.e("BigWhite","list file from sdcard to choose");
-                Intent intent = new Intent(MainActivity.this,FileManagerActivity.class);
-                startActivityForResult(intent,FILE_RESULT_CODE);
+                Log.e("BigWhite", "list file from sdcard to choose");
+                Intent intent = new Intent(MainActivity.this, FileManagerActivity.class);
+                startActivityForResult(intent, FILE_RESULT_CODE);
             }
         });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(FILE_RESULT_CODE == requestCode){
+
+        mClear.performClick();
+        if (FILE_RESULT_CODE == requestCode) {
             Bundle bundle = null;
-            if(data!=null&&(bundle=data.getExtras())!=null){
-                Log.e("BigWhite","select foleder file name is " + bundle.getString("file"));
-               // textView.setText("选择文件夹为："+bundle.getString("file"));
+            if (data != null && (bundle = data.getExtras()) != null) {
+                Log.e("BigWhite", "select foleder file name is " + bundle.getString("file"));
+                // textView.setText("选择文件夹为："+bundle.getString("file"));
                 String openedPdfFileName;
-                OpenPdf openPdf = new OpenPdf(paintArea.getWidth(),paintArea.getHeight());
+                OpenPdf openPdf = new OpenPdf(paintArea.getWidth(), paintArea.getHeight());
 
                 openedPdfFileName = bundle.getString("file");
-                if(openedPdfFileName != null){
+                if (openedPdfFileName != null) {
 
                     Log.e("BigWhite", "open pdf file is " + openedPdfFileName);
 
-                    if(resultCode == 2){
+                    if (resultCode == 2) {
                         System.out.println("选择文件为：" + openedPdfFileName);
                         openPdf.openRenderer(openedPdfFileName);
 
-                        if(openPdf.pdfBitmap != null)
-                        {
+                        if (openPdf.pdfBitmap != null) {
                             drawable = BitmapConvertToDrawale(openPdf.pdfBitmap);
                             getWindow().setBackgroundDrawable(drawable);
                         }
-                    }else if(resultCode == 3){
+                    } else if (resultCode == 3) {
                         System.out.println("选择图片为：" + openedPdfFileName);
-                        openPdf.openPicture(openedPdfFileName,paintArea.getWidth(),paintArea.getHeight());
+                        openPdf.openPicture(openedPdfFileName, paintArea.getWidth(), paintArea.getHeight());
 
                         drawable = BitmapConvertToDrawale(openPdf.image);
                         getWindow().setBackgroundDrawable(drawable);
 
                     }
-                }else {
+                } else {
                     Toast.makeText(getApplicationContext(),
                             "No pdf file found, Please create new Pdf file",
                             Toast.LENGTH_LONG).show();
@@ -413,11 +400,10 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void initEraser()
-    {
+    private void initEraser() {
         final int POP_WINDOW_WIDTH = WindowManager.LayoutParams.WRAP_CONTENT;
-        final int POP_WINDOW_HEIGHT = (int) (getResources().getDisplayMetrics().density *60 + 0.5f);
-        final View eraser_popupView = mLayoutInflater.inflate(R.layout.view_popup_eraser,null);
+        final int POP_WINDOW_HEIGHT = (int) (getResources().getDisplayMetrics().density * 60 + 0.5f);
+        final View eraser_popupView = mLayoutInflater.inflate(R.layout.view_popup_eraser, null);
         final View eraser_width1 = eraser_popupView.findViewById(R.id.eraser_width1);
         final View eraser_width2 = eraser_popupView.findViewById(R.id.eraser_width2);
         final View eraser_width3 = eraser_popupView.findViewById(R.id.eraser_width3);
@@ -485,5 +471,18 @@ public class MainActivity extends Activity {
             }
         });
 
+    }
+
+    private void initPageClose(){
+        pageclose.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View paramView) {
+                Bitmap bitmap = MainApplication.createBitmap(MainApplication.SCREEN_WIDTH, MainApplication.SCREEN_HEIGHT);
+                bitmap.eraseColor(Color.WHITE);
+                drawable = BitmapConvertToDrawale(bitmap);
+                getWindow().setBackgroundDrawable(drawable);
+
+                mClear.performClick();
+            }
+        });
     }
 }
