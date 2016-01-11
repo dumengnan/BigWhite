@@ -90,6 +90,7 @@ public class FileManagerActivity extends ListActivity{
             filepath = null;
             String fname = file.getName();
             String end = file.getName().substring(fname.lastIndexOf(".")+1,fname.length());
+            end = end.toLowerCase();
             if(end.equals("pdf")){
                 ret = 2;
                 filepath = curPath+"/"+file.getName();
