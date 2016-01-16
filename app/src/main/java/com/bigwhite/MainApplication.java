@@ -1,6 +1,7 @@
 package com.bigwhite;
 
 import android.app.Application;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.Display;
@@ -23,17 +24,19 @@ public class MainApplication extends Application {
         Log.e("BigWhite","MainApplication onCreate");
         super.onCreate();
 
-        Display display = ((WindowManager) getSystemService("window")).getDefaultDisplay();
+        WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        int width = wm.getDefaultDisplay().getWidth();
+        int height = wm.getDefaultDisplay().getHeight();
 
-        if (display.getWidth() < display.getHeight())
+        if (width < height)
         {
-            SCREEN_HEIGHT = display.getWidth();
-            SCREEN_WIDTH = display.getHeight();
+            SCREEN_HEIGHT = width;
+            SCREEN_WIDTH = height;
         }
         else
         {
-            SCREEN_WIDTH = display.getWidth();
-            SCREEN_HEIGHT = display.getHeight();
+            SCREEN_WIDTH = width;
+            SCREEN_HEIGHT = height;
         }
         Log.e("BigWhite","The Screen Size : " + SCREEN_HEIGHT+" "+SCREEN_WIDTH);
         CANVAS_WIDTH = MainApplication.SCREEN_WIDTH;
@@ -43,7 +46,7 @@ public class MainApplication extends Application {
     public static Bitmap createBitmap(int width, int height)
     {
         Bitmap bitmap = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888);
-        Log.e("BigWhite","createBitmap success");
+        Log.e("BigWhite","createBitmap width:"+width+"  height:"+height);
         return bitmap;
     }
 

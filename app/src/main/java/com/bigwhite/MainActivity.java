@@ -9,20 +9,30 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.Xfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class MainActivity extends Activity {
 
@@ -46,6 +56,7 @@ public class MainActivity extends Activity {
     private ImageView pagedown;
     private TextView pagenumber;
     private ImageView pageclose;
+    private ImageView savepage;
 
 
     private ImageView paintArea;
@@ -60,8 +71,13 @@ public class MainActivity extends Activity {
     float startY;
 
     private Drawable drawable;
-
     private OpenPdf openPdf;
+    private ArrayList<Bitmap> drawList = new ArrayList<Bitmap>();
+    private int type = 1; //标识当前打开的背景，1标识图片(默认)  2标识PDF
+    LinearLayout toolbox, toolbox2;
+
+    private int screen_width;
+    private int screen_height;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,10 +90,11 @@ public class MainActivity extends Activity {
         initClear(); //一键清除功能初始化
         initNewPage();//加载背景（eg.word ppt pdf）
         initColor();//颜色选择初始化
-        initEraser();
-        initpageup();
-        initpagedown();
-        initPageClose();
+        initEraser();//橡皮擦初始化
+        initpageup();//初始化pdf上一页
+        initpagedown();//初始化pdf下一页
+        initsavepage();//初始化保存按键
+        initPageClose();//返回初始状态
     }
 
     public static Drawable BitmapConvertToDrawale(Bitmap bitmap) {
@@ -93,18 +110,19 @@ public class MainActivity extends Activity {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if (baseBitmap == null) {
-                    baseBitmap = Bitmap.createBitmap(paintArea.getWidth(),
-                            paintArea.getHeight(),Bitmap.Config.ARGB_8888);
-
+                    //Log.e("BigWihte","basebit 为空");
+                    baseBitmap = Bitmap.createBitmap(screen_width, screen_height, Bitmap.Config.ARGB_8888);
                     baseBitmap.eraseColor(Color.TRANSPARENT);
                     canvas = new Canvas(baseBitmap);
                     canvas.drawColor(Color.TRANSPARENT);
                 }
+                //Log.e("BigWihte","basebit 不为空");
                 startX = event.getX();
                 startY = event.getY();
                 break;
 
             case MotionEvent.ACTION_MOVE:
+                //Log.e("BigWihte","移动");
                 float stopX = event.getX();
                 float stopY = event.getY();
 
@@ -117,6 +135,7 @@ public class MainActivity extends Activity {
                 break;
 
             case MotionEvent.ACTION_UP:
+                //Log.e("BigWihte","放开");
                 break;
             default:
                 break;
@@ -130,14 +149,20 @@ public class MainActivity extends Activity {
         super.onPause();
     }
 
+    //初始化界面，获得图标的ID
     private void initView() {
         //获得xml文件里定义的view
         mLayoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         paintArea = (ImageView) findViewById(R.id.paint_area);
+        toolbox = (LinearLayout) findViewById(R.id.toolbox);
+        toolbox2 = (LinearLayout) findViewById(R.id.toolbox2);
 
+        Display display = getWindowManager().getDefaultDisplay();
+        screen_width = display.getWidth();
+        screen_height = display.getHeight();
         //创建起始白色背景图片
-        Bitmap bitmap = MainApplication.createBitmap(MainApplication.SCREEN_WIDTH, MainApplication.SCREEN_HEIGHT);
+        Bitmap bitmap = MainApplication.createBitmap(screen_width, screen_height);
         bitmap.eraseColor(Color.WHITE);
         drawable = BitmapConvertToDrawale(bitmap);
         getWindow().setBackgroundDrawable(drawable);
@@ -150,33 +175,27 @@ public class MainActivity extends Activity {
 
         //获取笔迹宽度的view对象
         mEdit = (ImageView) findViewById(R.id.edit);
-
         mEraser = (ImageView) findViewById(R.id.eraser);
-
         mToolbox = findViewById(R.id.toolbox);
-
         mClear = (ImageView) findViewById(R.id.clear);
-
         mColor = (ImageView) findViewById(R.id.color);//颜色框
-
         mNewPage = (ImageView) findViewById(R.id.new_page); //加载背景ppt word pdf
-
         pagenumber = (TextView) findViewById(R.id.pagenumber);
-
         pageup = (ImageView) findViewById(R.id.undo);
-
         pagedown = (ImageView) findViewById(R.id.redo);
-
-
+        savepage = (ImageView) findViewById(R.id.save_page);
         pageclose = (ImageView) findViewById(R.id.page);
 
-        drawView = new DrawView(this);
+        // 获取屏幕宽和高
+        openPdf = new OpenPdf(screen_width, screen_height);
 
+        drawView = new DrawView(this);
         paint = new Paint();
         fermode = paint.getXfermode();
 
     }
 
+    //初始化画笔的宽度
     private void initPenSize() {
         final int POP_WINDOW_WIDTH = WindowManager.LayoutParams.WRAP_CONTENT;
         final int POP_WINDOW_HEIGHT = (int) (getResources().getDisplayMetrics().density * 60 + 0.5f);
@@ -247,6 +266,7 @@ public class MainActivity extends Activity {
         });
     }
 
+    //初始化清除图标
     private void initClear() {
         mClear.setOnClickListener(new View.OnClickListener() {
             public void onClick(View paramView) {
@@ -256,19 +276,20 @@ public class MainActivity extends Activity {
                 mNewPage.setSelected(false);
 
                 if (baseBitmap != null) {
-                    baseBitmap = Bitmap.createBitmap(paintArea.getWidth(),
-                            paintArea.getHeight(), Bitmap.Config.ARGB_8888);
-
+                    baseBitmap = null;
+                    baseBitmap = Bitmap.createBitmap(screen_width, screen_height, Bitmap.Config.ARGB_8888);
                     baseBitmap.eraseColor(Color.TRANSPARENT);
                     canvas = new Canvas(baseBitmap);
                     canvas.drawColor(Color.TRANSPARENT);
                     paintArea.setImageBitmap(baseBitmap);
                 }
                 mClear.setSelected(false);
+                Log.e("Bigwhite", "清除成功");
             }
         });
     }
 
+    //初始化颜色图标
     private void initColor() {
         final int POP_WINDOW_WIDTH = WindowManager.LayoutParams.WRAP_CONTENT;
         final int POP_WINDOW_HEIGHT = (int) (getResources().getDisplayMetrics().density * 60 + 0.5f);
@@ -354,130 +375,7 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void initNewPage() {
-        mNewPage.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View paramView) {
-                mNewPage.setSelected(true);
-                mClear.setSelected(false);
-                mEdit.setSelected(false);
-                mEraser.setSelected(false);
-
-                //加载文件管理器界面
-                Log.e("BigWhite", "list file from sdcard to choose");
-                Intent intent = new Intent(MainActivity.this, FileManagerActivity.class);
-                startActivityForResult(intent, FILE_RESULT_CODE);
-            }
-        });
-    }
-
-    //向上翻页
-    private void initpageup()
-    {
-
-        pageup.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View paramView) {
-                int ret = openPdf.getCurrentPage();
-                if(ret != 0) {
-                    Log.e("BigWhite", "*****************1");
-                    mClear.performClick();
-                    openPdf.pagedown();
-                    Log.e("BigWhite", "*****************3");
-                    if (openPdf.pdfBitmap != null) {
-                        drawable = BitmapConvertToDrawale(openPdf.pdfBitmap);
-                        getWindow().setBackgroundDrawable(drawable);
-                    }
-                    ret = openPdf.getCurrentPage();
-                    pagenumber.setText(""+(ret+1));
-                }
-            }
-        });
-    }
-
-    //向下翻页
-    private void initpagedown()
-    {
-        pagedown.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View paramView) {
-                int cur_page = openPdf.getCurrentPage();
-                int tot_page = openPdf.gettotalpage();
-                Log.e("Bigwhite","***************"+tot_page);
-                if(cur_page + 2 <= tot_page ){
-                    Log.e("BigWhite","*****************2");
-                    mClear.performClick();
-                    openPdf.pageup();
-                    Log.e("BigWhite", "*****************4");
-                    if(openPdf.pdfBitmap != null)
-                    {
-                        drawable = BitmapConvertToDrawale(openPdf.pdfBitmap);
-                        getWindow().setBackgroundDrawable(drawable);
-                    }
-                    cur_page = openPdf.getCurrentPage();
-                    pagenumber.setText(""+(cur_page + 1));
-                }
-
-            }
-        });
-    }
-
-    //显示上下翻页和当前页数
-    private void showtools(){
-        pageup.setVisibility(View.VISIBLE);
-        pagedown.setVisibility(View.VISIBLE);
-        pagenumber.setVisibility(View.VISIBLE);
-        pagenumber.setText("1");
-    }
-
-    //屏蔽上下翻页和当前页数
-    private void closetools(){
-        pageup.setVisibility(View.INVISIBLE);
-        pagedown.setVisibility(View.INVISIBLE);
-        pagenumber.setVisibility(View.INVISIBLE);
-        pagenumber.setText("1");
-    }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        mClear.performClick();
-        if (FILE_RESULT_CODE == requestCode) {
-            Bundle bundle = null;
-            if (data != null && (bundle = data.getExtras()) != null) {
-                Log.e("BigWhite", "select foleder file name is " + bundle.getString("file"));
-                // textView.setText("选择文件夹为："+bundle.getString("file"));
-                String openedPdfFileName;
-                openPdf = new OpenPdf(paintArea.getWidth(),paintArea.getHeight());
-                Log.e("BigWhite","***********************"+openPdf.getCurrentPage());
-                openedPdfFileName = bundle.getString("file");
-                if (openedPdfFileName != null) {
-
-                    Log.e("BigWhite", "open pdf file is " + openedPdfFileName);
-
-                    if(resultCode == 2){
-
-                        showtools();
-                        System.out.println("选择文件为：" + openedPdfFileName);
-                        openPdf.openRenderer(openedPdfFileName);
-
-                        if (openPdf.pdfBitmap != null) {
-                            drawable = BitmapConvertToDrawale(openPdf.pdfBitmap);
-                            getWindow().setBackgroundDrawable(drawable);
-                        }
-                    } else if (resultCode == 3) {
-                        System.out.println("选择图片为：" + openedPdfFileName);
-                        openPdf.openPicture(openedPdfFileName, paintArea.getWidth(), paintArea.getHeight());
-
-                        drawable = BitmapConvertToDrawale(openPdf.image);
-                        getWindow().setBackgroundDrawable(drawable);
-
-                    }
-                } else {
-                    Toast.makeText(getApplicationContext(),
-                            "No pdf file found, Please create new Pdf file",
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-    }
-
+    //橡皮檫
     private void initEraser() {
         final int POP_WINDOW_WIDTH = WindowManager.LayoutParams.WRAP_CONTENT;
         final int POP_WINDOW_HEIGHT = (int) (getResources().getDisplayMetrics().density * 60 + 0.5f);
@@ -551,8 +449,9 @@ public class MainActivity extends Activity {
 
     }
 
-    private void initPageClose(){
-        pageclose.setOnClickListener(new View.OnClickListener(){
+    //返回白色背景界面
+    private void initPageClose() {
+        pageclose.setOnClickListener(new View.OnClickListener() {
             public void onClick(View paramView) {
                 Bitmap bitmap = MainApplication.createBitmap(MainApplication.SCREEN_WIDTH, MainApplication.SCREEN_HEIGHT);
                 bitmap.eraseColor(Color.WHITE);
@@ -561,7 +460,268 @@ public class MainActivity extends Activity {
 
                 mClear.performClick();
                 closetools();
+                drawList.clear();
+                type = 1;
             }
         });
     }
+
+    //初始化+号，打开文件管理器
+    private void initNewPage() {
+        mNewPage.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View paramView) {
+                mNewPage.setSelected(true);
+                mClear.setSelected(false);
+                mEdit.setSelected(false);
+                mEraser.setSelected(false);
+
+                //加载文件管理器界面
+                Log.e("BigWhite", "list file from sdcard to choose");
+                Intent intent = new Intent(MainActivity.this, FileManagerActivity.class);
+                startActivityForResult(intent, FILE_RESULT_CODE);
+            }
+        });
+    }
+
+    //向上翻页
+    private void initpageup() {
+
+        pageup.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View paramView) {
+
+                Bitmap temp = baseBitmap.copy(baseBitmap.getConfig(), true);
+                int currentpage = openPdf.getCurrentPage();
+                if (currentpage != 0) {
+                    Log.e("BigWhite", "向上翻页");
+
+                    if (currentpage == drawList.size()) {
+                        drawList.add(temp);
+                    } else {
+                        drawList.set(currentpage, temp);
+                    }
+                    openPdf.pageup();
+                    setBackground(openPdf.pdfBitmap);
+                    currentpage = openPdf.getCurrentPage();
+                    pagenumber.setText("" + (currentpage + 1));
+
+                    Log.e("Bigwhite", "设置页数成功：" + (currentpage + 1));
+
+                    baseBitmap = (Bitmap) drawList.get(currentpage);
+                    canvas = new Canvas(baseBitmap);
+                    canvas.drawColor(Color.TRANSPARENT);
+                    paintArea.setImageBitmap(baseBitmap);
+                    //paintArea.setImageBitmap((Bitmap)drawList.get(currentpage));
+                    /*
+                    if(drawList.size() > currentpage){
+                        if(baseBitmap.equals((Bitmap)drawList.get(currentpage))){
+                            Log.e("BigWihte","basebit 与缓存相等");
+                            canvas = new Canvas(baseBitmap);
+                            canvas.drawColor(Color.TRANSPARENT);
+                        }
+                    }
+                    */
+                }
+            }
+        });
+    }
+
+    //向下翻页
+    private void initpagedown() {
+        pagedown.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View paramView) {
+
+                Bitmap temp = baseBitmap.copy(baseBitmap.getConfig(), true);
+                int currentpage = openPdf.getCurrentPage();
+                int totalpage = openPdf.gettotalpage();
+                if (currentpage < totalpage - 1) {
+                    Log.e("Bigwhite", "向下翻页");
+
+                    if (currentpage == drawList.size()) {
+                        drawList.add(temp);
+                    } else {
+                        drawList.set(currentpage, temp);
+                    }
+                    Log.e("Bigwhite", "drawList 数目：" + drawList.size());
+
+                    openPdf.pagedown();
+                    setBackground(openPdf.pdfBitmap);
+                    currentpage = openPdf.getCurrentPage();
+                    pagenumber.setText("" + (currentpage + 1));
+
+                    Log.e("Bigwhite", "设置页数成功：" + (currentpage + 1));
+
+                    try {
+                        if (drawList.size() > currentpage) {
+                            baseBitmap = (Bitmap) drawList.get(currentpage);
+                            //paintArea.setImageBitmap((Bitmap)drawList.get(currentpage));
+                            canvas = new Canvas(baseBitmap);
+                            canvas.drawColor(Color.TRANSPARENT);
+                            paintArea.setImageBitmap(baseBitmap);
+                            Log.e("Bigwhite", "4");
+                        } else {
+                            Log.e("Bigwhite", "5");
+                            mClear.performClick();
+                        }
+
+                    } catch (Exception e) {
+                        Log.e("Bigwhite", "翻页错误");
+                        e.printStackTrace();
+                    }
+
+                }
+
+            }
+        });
+    }
+
+    //初始化保存按键
+    private void initsavepage() {
+        savepage.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View paramView) {
+                toolbox.setVisibility(View.GONE);
+                toolbox2.setVisibility(View.GONE);
+                // 获取windows中最顶层的view
+                View view = getWindow().getDecorView();
+                view.buildDrawingCache();
+
+                // 获取状态栏高度
+                Rect rect = new Rect();
+                view.getWindowVisibleDisplayFrame(rect);
+                int statusBarHeights = rect.top;
+                Display display = getWindowManager().getDefaultDisplay();
+
+                // 获取屏幕宽和高
+                int widths = display.getWidth();
+                int heights = display.getHeight();
+
+                // 允许当前窗口保存缓存信息
+                view.setDrawingCacheEnabled(true);
+
+                // 去掉状态栏
+                Bitmap bmp = Bitmap.createBitmap(view.getDrawingCache(), 0,
+                        statusBarHeights, widths, heights - statusBarHeights);
+
+                // 销毁缓存信息
+                view.destroyDrawingCache();
+                saveToFile(bmp);
+                toolbox.setVisibility(View.VISIBLE);
+                toolbox2.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
+    //显示pdf的功能键
+    private void showtools() {
+        pageup.setVisibility(View.VISIBLE);
+        pagedown.setVisibility(View.VISIBLE);
+        pagenumber.setVisibility(View.VISIBLE);
+        pagenumber.setText("1");
+    }
+
+    //屏蔽pdf的功能键
+    private void closetools() {
+        pageup.setVisibility(View.INVISIBLE);
+        pagedown.setVisibility(View.INVISIBLE);
+        pagenumber.setVisibility(View.INVISIBLE);
+        pagenumber.setText("1");
+    }
+
+    //设置背景
+    private void setBackground(Bitmap background) {
+        drawable = BitmapConvertToDrawale(background);
+        this.getWindow().setBackgroundDrawable(drawable);
+    }
+
+    //处理文件管理器的反馈
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        mClear.performClick();
+        if (FILE_RESULT_CODE == requestCode) {
+            Bundle bundle = null;
+            if (data != null && (bundle = data.getExtras()) != null) {
+
+                String openedPdfFileName = bundle.getString("file");
+                if (openedPdfFileName != null) {
+
+                    Log.e("BigWhite", "open pdf or picture is " + openedPdfFileName);
+
+                    if (resultCode == 2) {
+                        showtools(); //显示pdf的工具栏
+                        type = 2; //标识打开的文档为pdf
+                        Log.e("BigWhite", "进入pdf");
+                        //重新绘图
+                        //openPdf.openRenderer(openedPdfFileName);
+
+                        openPdf.openRenderer(openedPdfFileName);
+
+                        if (openPdf.pdfBitmap != null) {
+                            Log.e("BigWhite", "重新画图");
+                            Log.e("BigWhite", "drawList size:" + drawList.size());
+                            setBackground(openPdf.pdfBitmap);
+                        }
+
+                        //初始化drawList
+                       drawList.clear();
+
+                    } else if (resultCode == 3) {
+                        Log.e("BigWhite", "进入图片");
+                        closetools();
+
+                        //重新绘图
+                        openPdf.openPicture(openedPdfFileName, screen_width, screen_height);
+                        if (openPdf.image != null) {
+                            if (baseBitmap != null) {
+                                baseBitmap = null;
+                            }
+                            drawable = BitmapConvertToDrawale(openPdf.image);
+                            this.getWindow().setBackgroundDrawable(drawable);
+                            drawList.clear();
+                            Log.e("BigWhite", "drawList 初始化长度："+drawList.size());
+                        }
+
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(),
+                            "No pdf file found, Please create new Pdf file",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
+    //截图
+    private void saveToFile(final Bitmap savebitmap) {
+        // 获取SDCard目录,2.2的时候为:/mnt/sdcart 2.1的时候为：/sdcard
+        File sdCardDir = Environment.getExternalStorageDirectory();
+        Log.e("BigWhite", "******************SD:" + sdCardDir);
+
+        File dir = new File(sdCardDir.getPath() + File.separator + "BigWhite" + File.separator
+                + (new SimpleDateFormat("yyyy-MM-dd")).format(new Date()));
+
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        try {
+            String name = (new SimpleDateFormat("HHmmss")).format(new Date());
+            File saveFile = new File(dir.getPath(), name + ".png");
+            FileOutputStream outStream = new FileOutputStream(saveFile);
+            savebitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+            outStream.close();
+            Log.e("BigWhite", "保存成功");
+            Toast.makeText(getApplicationContext(),
+                    "Save the PDF success : " + saveFile.getPath(),
+                    Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("BigWhite", "保存失败");
+            Toast.makeText(getApplicationContext(),
+                    "Save the PDF failure",
+                    Toast.LENGTH_LONG).show();
+        }
+
+    }
+
+
 }

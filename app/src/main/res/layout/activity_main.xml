@@ -39,6 +39,8 @@
             android:visibility="gone" />
 
     </RelativeLayout>
+
+
     <LinearLayout
         android:id="@+id/toolbox"
         android:layout_width="wrap_content"
@@ -47,6 +49,7 @@
         android:layout_centerVertical="true"
         android:background="@android:color/transparent"
         android:orientation="vertical"
+        android:visibility="visible"
         android:padding="3dip" >
 
 
@@ -101,11 +104,13 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/toolbox2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignRight="@id/parent"
         android:gravity="right|center_vertical"
         android:orientation="horizontal"
+        android:visibility="visible"
         android:padding="5dip" >
 
 
@@ -147,6 +152,14 @@
             android:scaleType="center"
             android:src="@drawable/page_add" />
 
+        <ImageView
+            android:id="@+id/save_page"
+            android:layout_width="50dip"
+            android:layout_height="50dip"
+            android:background="@drawable/page_selector"
+            android:scaleType="center"
+            android:src="@drawable/page_remove" />
+
 
         <ImageView
             android:id="@+id/page"
@@ -155,7 +168,6 @@
             android:background="@drawable/page_selector"
             android:scaleType="center"
             android:src="@drawable/page_preview" />
-
 
     </LinearLayout>
 
