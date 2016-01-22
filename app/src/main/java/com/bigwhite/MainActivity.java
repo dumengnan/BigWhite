@@ -127,6 +127,10 @@ public class MainActivity extends Activity {
                     canvas = new Canvas(baseBitmap);
                     canvas.drawColor(Color.TRANSPARENT);
                 }
+//                if(canvas == null){
+//                    canvas = new Canvas(baseBitmap);
+//                    canvas.drawColor(Color.TRANSPARENT);
+//                }
                 //Log.e("BigWihte","basebit 不为空");
                 startX = event.getX();
                 startY = event.getY();
@@ -175,6 +179,10 @@ public class MainActivity extends Activity {
         //创建起始白色背景图片
         baseBitmap= MainApplication.createBitmap(screen_width, screen_height);
         baseBitmap.eraseColor(Color.WHITE);
+
+        canvas = new Canvas(baseBitmap);
+        canvas.drawColor(Color.TRANSPARENT);
+
         drawable = BitmapConvertToDrawale(baseBitmap);
         getWindow().setBackgroundDrawable(drawable);
 
@@ -205,6 +213,8 @@ public class MainActivity extends Activity {
         drawView = new DrawView(this);
         paint = new Paint();
         fermode = paint.getXfermode();
+
+
     }
 
     //初始化画笔的宽度

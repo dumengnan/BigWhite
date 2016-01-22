@@ -1,6 +1,7 @@
 package com.bigwhite.webRTC;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Point;
 import android.opengl.GLSurfaceView;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -59,6 +61,7 @@ public class webRtcActivity extends Activity implements WebRtcClient.RtcListener
     private String callerId;
 
     private ImageButton connectButton;
+    private ImageButton disconnectButton;
     private EditText roomEditText;
 
     @Override
@@ -100,15 +103,30 @@ public class webRtcActivity extends Activity implements WebRtcClient.RtcListener
     private void initView(){
         roomEditText = (EditText) findViewById(R.id.room_edittext);
         connectButton = (ImageButton) findViewById(R.id.connect_button);
+        disconnectButton = (ImageButton) findViewById(R.id.remove_room_button);
+
+        //用户输入之后隐藏输入法
+        InputMethodManager imm = (InputMethodManager) getSystemService(
+                Context.INPUT_METHOD_SERVICE
+        );
+        imm.hideSoftInputFromInputMethod(roomEditText.getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
 
         connectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String roomId = roomEditText.getText().toString();
+
                 if (roomId == null) {
                     Log.e(TAG, "roomId is null");
                 } else
                     connectToRoom(roomId);
+            }
+        });
+
+        disconnectButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+
             }
         });
     }
@@ -149,14 +167,6 @@ public class webRtcActivity extends Activity implements WebRtcClient.RtcListener
         client.sendMessage(callerId, "init", null);
         startCam(callerId);
     }
-
-    //将创建的房间链接地址共享给其他人.
-//    public void call(String callId) {
-//        Intent msg = new Intent(Intent.ACTION_SEND);
-//        msg.putExtra(Intent.EXTRA_TEXT, mSocketAddress + callId);
-//        msg.setType("text/plain");
-//        startActivityForResult(Intent.createChooser(msg, "Call someone :"), VIDEO_CALL_SENT);
-//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

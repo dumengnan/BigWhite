@@ -47,7 +47,7 @@ public class WebRtcClient {
     private interface Command{
         void execute(String peerId, JSONObject payload) throws JSONException;
     }
-
+    //创建offer
     private class CreateOfferCommand implements Command{
         public void execute(String peerId, JSONObject payload) throws JSONException {
             Log.d(TAG,"CreateOfferCommand");
@@ -55,7 +55,7 @@ public class WebRtcClient {
             peer.pc.createOffer(peer, pcConstraints);
         }
     }
-
+    //创建answer
     private class CreateAnswerCommand implements Command{
         public void execute(String peerId, JSONObject payload) throws JSONException {
             Log.d(TAG,"CreateAnswerCommand");
@@ -68,7 +68,7 @@ public class WebRtcClient {
             peer.pc.createAnswer(peer, pcConstraints);
         }
     }
-
+    //设置远程SDP信息
     private class SetRemoteSDPCommand implements Command{
         public void execute(String peerId, JSONObject payload) throws JSONException {
             Log.d(TAG,"SetRemoteSDPCommand");
@@ -80,7 +80,7 @@ public class WebRtcClient {
             peer.pc.setRemoteDescription(peer, sdp);
         }
     }
-
+   //添加ICE(交互式连接建立)候选
     private class AddIceCandidateCommand implements Command{
         public void execute(String peerId, JSONObject payload) throws JSONException {
             Log.d(TAG,"AddIceCandidateCommand");
@@ -104,6 +104,7 @@ public class WebRtcClient {
      * @param payload payload of message
      * @throws JSONException
      */
+    //向服务器发送message信息
     public void sendMessage(String to, String type, JSONObject payload) throws JSONException {
         JSONObject message = new JSONObject();
         message.put("to", to);
@@ -111,12 +112,13 @@ public class WebRtcClient {
         message.put("payload", payload);
         client.emit("message", message);
     }
-
+    //向服务器发送房间号相关信息
     public void sendRoomId(String roomId){
         Log.e(TAG,"send roomid to server" + roomId);
         client.emit("create or joined room",roomId);
     }
 
+    //对信令服务器发送信息进行处理
     private class MessageHandler {
         private HashMap<String, Command> commandMap;
 
@@ -235,6 +237,7 @@ public class WebRtcClient {
         public void onRemoveStream(MediaStream mediaStream) {
             Log.d(TAG,"onRemoveStream "+mediaStream.label());
             removePeer(id);
+            mListener.onRemoveRemoteStream(endPoint+1);
         }
 
         @Override
