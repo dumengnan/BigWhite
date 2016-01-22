@@ -28,6 +28,8 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bigwhite.webRTC.webRtcActivity;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
@@ -58,6 +60,7 @@ public class MainActivity extends Activity {
     private TextView pagenumber;
     private ImageView pageclose;
     private ImageView savepage;
+    private ImageView pageShare;
 
 
     private ImageView paintArea;
@@ -85,6 +88,10 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         Log.e("BigWhite", "MainActivity oncreate");
         setContentView(R.layout.activity_main);
 
@@ -98,6 +105,7 @@ public class MainActivity extends Activity {
         initpagedown();//初始化pdf下一页
         initsavepage();//初始化保存按键
         initPageClose();//返回初始状态
+        initPageShare();//webrtc共享
     }
 
     public static Drawable BitmapConvertToDrawale(Bitmap bitmap) {
@@ -188,6 +196,7 @@ public class MainActivity extends Activity {
         pagedown = (ImageView) findViewById(R.id.redo);
         savepage = (ImageView) findViewById(R.id.save_page);
         pageclose = (ImageView) findViewById(R.id.page);
+        pageShare = (ImageView) findViewById(R.id.page_share);
 
         // 获取屏幕宽和高
         openPdf = new OpenPdf(screen_width, screen_height);
@@ -196,7 +205,6 @@ public class MainActivity extends Activity {
         drawView = new DrawView(this);
         paint = new Paint();
         fermode = paint.getXfermode();
-
     }
 
     //初始化画笔的宽度
@@ -486,6 +494,17 @@ public class MainActivity extends Activity {
             }
         });
     }
+
+    //webRtc 视频共享
+    private void initPageShare(){
+        pageShare.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View paramView){
+                Intent intent = new Intent(MainActivity.this, webRtcActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
 
     //向上翻页
     private void initpageup() {

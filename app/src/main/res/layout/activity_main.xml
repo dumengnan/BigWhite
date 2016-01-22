@@ -77,7 +77,6 @@
             android:scaleType="center"
             android:src="@drawable/ic_eraser" />
 
-
         <LinearLayout
             android:id="@+id/color_frame"
             android:layout_width="50dip"
@@ -171,6 +170,14 @@
             android:background="@drawable/page_selector"
             android:scaleType="center"
             android:src="@drawable/page_preview" />
+
+        <ImageView
+            android:id="@+id/page_share"
+            android:layout_width="50dip"
+            android:layout_height="50dip"
+            android:background="@drawable/page_selector"
+            android:scaleType="center"
+            android:src="@drawable/page_share" />
 
     </LinearLayout>
 
