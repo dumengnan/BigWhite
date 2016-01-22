@@ -34,6 +34,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+
 public class MainActivity extends Activity {
 
     private static final int FILE_RESULT_CODE = 1;
@@ -72,6 +73,8 @@ public class MainActivity extends Activity {
 
     private Drawable drawable;
     private OpenPdf openPdf;
+    private OpenDoc openDoc;
+    private OpenPPT openPpt;
     private ArrayList<Bitmap> drawList = new ArrayList<Bitmap>();
     private int type = 1; //标识当前打开的背景，1标识图片(默认)  2标识PDF
     LinearLayout toolbox, toolbox2;
@@ -162,9 +165,9 @@ public class MainActivity extends Activity {
         screen_width = display.getWidth();
         screen_height = display.getHeight();
         //创建起始白色背景图片
-        Bitmap bitmap = MainApplication.createBitmap(screen_width, screen_height);
-        bitmap.eraseColor(Color.WHITE);
-        drawable = BitmapConvertToDrawale(bitmap);
+        baseBitmap= MainApplication.createBitmap(screen_width, screen_height);
+        baseBitmap.eraseColor(Color.WHITE);
+        drawable = BitmapConvertToDrawale(baseBitmap);
         getWindow().setBackgroundDrawable(drawable);
 
 
@@ -188,7 +191,8 @@ public class MainActivity extends Activity {
 
         // 获取屏幕宽和高
         openPdf = new OpenPdf(screen_width, screen_height);
-
+        openDoc = new OpenDoc(screen_width, screen_height);
+        openPpt = new OpenPPT(screen_width, screen_height);
         drawView = new DrawView(this);
         paint = new Paint();
         fermode = paint.getXfermode();
@@ -489,9 +493,24 @@ public class MainActivity extends Activity {
         pageup.setOnClickListener(new View.OnClickListener() {
             public void onClick(View paramView) {
 
-                Bitmap temp = baseBitmap.copy(baseBitmap.getConfig(), true);
-                int currentpage = openPdf.getCurrentPage();
+                int currentpage=0;
+
+                if(type == 2){
+                    currentpage = openPdf.getCurrentPage();
+                }
+
+                if(type == 4){
+                    currentpage = openPpt.getcurrentpage();
+                }
+
+                if(type == 5){
+                    currentpage = openDoc.getcurrentpage();
+                }
+                Log.e("BigWhite","currentpage  "+currentpage);
                 if (currentpage != 0) {
+
+                    Bitmap temp = baseBitmap.copy(baseBitmap.getConfig(), true);
+
                     Log.e("BigWhite", "向上翻页");
 
                     if (currentpage == drawList.size()) {
@@ -499,9 +518,25 @@ public class MainActivity extends Activity {
                     } else {
                         drawList.set(currentpage, temp);
                     }
-                    openPdf.pageup();
-                    setBackground(openPdf.pdfBitmap);
-                    currentpage = openPdf.getCurrentPage();
+
+                    if(type == 2){
+                        openPdf.pageup();
+                        setBackground(openPdf.pdfBitmap);
+                        currentpage = openPdf.getCurrentPage();
+                    }
+
+                    if(type == 4){
+                        openPpt.pageup();
+                        setBackground(openPpt.currentbitmap);
+                        currentpage = openPpt.getcurrentpage();
+                    }
+
+                    if(type == 5){
+                        openDoc.pageup();
+                        setBackground(openDoc.currentbitmap);
+                        currentpage = openDoc.getcurrentpage();
+                    }
+
                     pagenumber.setText("" + (currentpage + 1));
 
                     Log.e("Bigwhite", "设置页数成功：" + (currentpage + 1));
@@ -510,16 +545,8 @@ public class MainActivity extends Activity {
                     canvas = new Canvas(baseBitmap);
                     canvas.drawColor(Color.TRANSPARENT);
                     paintArea.setImageBitmap(baseBitmap);
-                    //paintArea.setImageBitmap((Bitmap)drawList.get(currentpage));
-                    /*
-                    if(drawList.size() > currentpage){
-                        if(baseBitmap.equals((Bitmap)drawList.get(currentpage))){
-                            Log.e("BigWihte","basebit 与缓存相等");
-                            canvas = new Canvas(baseBitmap);
-                            canvas.drawColor(Color.TRANSPARENT);
-                        }
-                    }
-                    */
+                }else{
+                    Log.e("Bigwhite","到顶了，点了没用");
                 }
             }
         });
@@ -530,11 +557,29 @@ public class MainActivity extends Activity {
         pagedown.setOnClickListener(new View.OnClickListener() {
             public void onClick(View paramView) {
 
-                Bitmap temp = baseBitmap.copy(baseBitmap.getConfig(), true);
-                int currentpage = openPdf.getCurrentPage();
-                int totalpage = openPdf.gettotalpage();
+                int currentpage=0;
+                int totalpage=0;
+
+                if (type == 2) {
+                    currentpage = openPdf.getCurrentPage();
+                    totalpage = openPdf.gettotalpage();
+                }
+
+                if (type == 4) {
+                    currentpage = openPpt.getcurrentpage();
+                    totalpage = openPpt.gettotalpage();
+                }
+
+                if(type == 5){
+                    currentpage = openDoc.getcurrentpage();
+                    totalpage = openDoc.gettotalpage();
+                }
+
+                Log.e("BigWhite","currentpage  "+currentpage+"   totalpage "+totalpage);
                 if (currentpage < totalpage - 1) {
                     Log.e("Bigwhite", "向下翻页");
+
+                    Bitmap temp = baseBitmap.copy(baseBitmap.getConfig(), true);
 
                     if (currentpage == drawList.size()) {
                         drawList.add(temp);
@@ -543,9 +588,22 @@ public class MainActivity extends Activity {
                     }
                     Log.e("Bigwhite", "drawList 数目：" + drawList.size());
 
-                    openPdf.pagedown();
-                    setBackground(openPdf.pdfBitmap);
-                    currentpage = openPdf.getCurrentPage();
+                    if(type ==2 ){
+                        openPdf.pagedown();
+                        setBackground(openPdf.pdfBitmap);
+                        currentpage = openPdf.getCurrentPage();
+                    }
+                    if(type ==4){
+                        openPpt.pagedown();
+                        setBackground(openPpt.currentbitmap);
+                        currentpage = openPpt.getcurrentpage();
+                    }
+                    if(type ==5){
+                        openDoc.pagedown();
+                        setBackground(openDoc.currentbitmap);
+                        currentpage = openDoc.getcurrentpage();
+                    }
+
                     pagenumber.setText("" + (currentpage + 1));
 
                     Log.e("Bigwhite", "设置页数成功：" + (currentpage + 1));
@@ -557,9 +615,9 @@ public class MainActivity extends Activity {
                             canvas = new Canvas(baseBitmap);
                             canvas.drawColor(Color.TRANSPARENT);
                             paintArea.setImageBitmap(baseBitmap);
-                            Log.e("Bigwhite", "4");
+
                         } else {
-                            Log.e("Bigwhite", "5");
+
                             mClear.performClick();
                         }
 
@@ -568,6 +626,8 @@ public class MainActivity extends Activity {
                         e.printStackTrace();
                     }
 
+                }else{
+                    Log.e("Bigwhite","到底了，点了没用");
                 }
 
             }
@@ -651,8 +711,6 @@ public class MainActivity extends Activity {
                         type = 2; //标识打开的文档为pdf
                         Log.e("BigWhite", "进入pdf");
                         //重新绘图
-                        //openPdf.openRenderer(openedPdfFileName);
-
                         openPdf.openRenderer(openedPdfFileName);
 
                         if (openPdf.pdfBitmap != null) {
@@ -668,6 +726,7 @@ public class MainActivity extends Activity {
                         Log.e("BigWhite", "进入图片");
                         closetools();
 
+
                         //重新绘图
                         openPdf.openPicture(openedPdfFileName, screen_width, screen_height);
                         if (openPdf.image != null) {
@@ -680,6 +739,36 @@ public class MainActivity extends Activity {
                             Log.e("BigWhite", "drawList 初始化长度："+drawList.size());
                         }
 
+                    }else if (resultCode == 5) {
+                        showtools(); //显示pdf的工具栏
+                        type = 5; //标识打开的文档为pdf
+                        Log.e("BigWhite", "进入DOC");
+                        //重新绘图
+                        openDoc.opendoc(openedPdfFileName);
+
+                        if (openDoc.currentbitmap!= null) {
+                            Log.e("BigWhite", "重新画图");
+                            Log.e("BigWhite", "drawList size:" + drawList.size());
+                            setBackground(openDoc.currentbitmap);
+                        }
+
+                        //初始化drawList
+                        drawList.clear();
+                    }else if(resultCode == 4){
+                        showtools(); //显示pdf的工具栏
+                        type = 4; //标识打开的文档为pdf
+                        Log.e("BigWhite", "进入PPT");
+                        //重新绘图
+                        openPpt.readPPTX(openedPdfFileName);
+
+                        if (openPpt.currentbitmap!= null) {
+                            Log.e("BigWhite", "重新画图");
+                            Log.e("BigWhite", "drawList size:" + drawList.size());
+                            setBackground(openPpt.currentbitmap);
+                        }
+
+                        //初始化drawList
+                        drawList.clear();
                     }
                 } else {
                     Toast.makeText(getApplicationContext(),

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    tools:context=".MainActivity">
 
     <RelativeLayout
         android:id="@+id/board_frame"
@@ -28,7 +30,8 @@
             android:shadowDy="1.0"
             android:shadowRadius="1.0"
             android:textColor="#000000"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:visibility="visible"/>
 
         <ImageView
             android:id="@+id/line"

@@ -98,6 +98,12 @@ public class FileManagerActivity extends ListActivity{
                     || end.equals("jpeg") || end.equals("bmp")){
                 ret = 3;
                 filepath = curPath+"/"+file.getName();
+            }else if(end.equals("pptx")){
+                ret = 4;
+                filepath = curPath+"/"+file.getName();
+            }else if(end.equals("doc")){
+                ret = 5;
+                filepath = curPath+"/"+file.getName();
             }
         }
     }
