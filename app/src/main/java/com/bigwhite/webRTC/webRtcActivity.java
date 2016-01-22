@@ -123,10 +123,12 @@ public class webRtcActivity extends Activity implements WebRtcClient.RtcListener
             }
         });
 
+        //当用户点击挂断之后，返回白板界面
         disconnectButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-
+                client.disconnectroom();
+                webRtcActivity.this.finish();
             }
         });
     }
@@ -178,7 +180,7 @@ public class webRtcActivity extends Activity implements WebRtcClient.RtcListener
     public void startCam(String roomId) {
         // Camera settings
         client.setCamera();
-        client.start(roomId,"BigWhite");
+//        client.start(roomId,"BigWhite");
     }
 
     @Override

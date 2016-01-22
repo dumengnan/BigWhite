@@ -25,6 +25,7 @@ public class WebRtcClient {
     private MediaConstraints pcConstraints = new MediaConstraints();
     private MediaStream localMS; //本地的视频流
     private VideoSource videoSource;
+    private AudioSource audioSource;
     private RtcListener mListener;
     private Socket client;
 
@@ -114,8 +115,32 @@ public class WebRtcClient {
     }
     //向服务器发送房间号相关信息
     public void sendRoomId(String roomId){
-        Log.e(TAG,"send roomid to server" + roomId);
+        Log.e(TAG, "send roomid to server" + roomId);
         client.emit("create or joined room",roomId);
+    }
+
+    //断开连接
+    public void disconnectroom(){
+
+        for (Peer peer : peers.values()) {
+            peer.pc.dispose();
+        }
+        try {
+//            if(videoSource != null) {
+//                videoSource.dispose();
+//                videoSource = null;
+//            }
+//            if(factory != null) {
+//                factory.dispose();
+//                factory = null;
+//            }
+            client.off();
+            client.disconnect();
+            client.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     //对信令服务器发送信息进行处理
@@ -169,6 +194,7 @@ public class WebRtcClient {
                 mListener.onCallReady(id);
             }
         };
+
     }
 
     private class Peer implements SdpObserver, PeerConnection.Observer{
@@ -343,17 +369,17 @@ public class WebRtcClient {
      * @param name client name
      */
 
-    public void start(String roomId,String name){
-        try {
-            JSONObject message = new JSONObject();
-            message.put("id",roomId);
-            message.put("name", name);
-            Log.e(TAG,"room id and name is "+message);
-            client.emit("readyToStream", message);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
+//    public void start(String roomId,String name){
+//        try {
+//            JSONObject message = new JSONObject();
+//            message.put("id",roomId);
+//            message.put("name", name);
+//            Log.e(TAG,"room id and name is "+message);
+//            client.emit("readyToStream", message);
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     //摄像头画面以及音频获取相关
     public void setCamera(){
@@ -369,7 +395,7 @@ public class WebRtcClient {
             localMS.addTrack(factory.createVideoTrack("ARDAMSv0", videoSource));
         }
 
-        AudioSource audioSource = factory.createAudioSource(new MediaConstraints());
+        audioSource = factory.createAudioSource(new MediaConstraints());
         localMS.addTrack(factory.createAudioTrack("ARDAMSa0", audioSource));
 
         mListener.onLocalStream(localMS);

@@ -106,6 +106,8 @@ public class MainActivity extends Activity {
         initsavepage();//初始化保存按键
         initPageClose();//返回初始状态
         initPageShare();//webrtc共享
+
+        pageclose.performClick();
     }
 
     public static Drawable BitmapConvertToDrawale(Bitmap bitmap) {
@@ -441,7 +443,7 @@ public class MainActivity extends Activity {
         //监听选中的橡皮擦宽度
         eraser_width1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                drawView.setmPenWidth(1f);
+                drawView.setmPenWidth(10f);
                 mEraser.setSelected(true);
                 paint.setAlpha(0);
                 paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
@@ -450,7 +452,7 @@ public class MainActivity extends Activity {
         });
         eraser_width2.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                drawView.setmPenWidth(3f);
+                drawView.setmPenWidth(20f);
                 Log.e("BigWhite", "selected 3f pen size");
                 mEraser.setSelected(true);
                 paint.setAlpha(0);
@@ -460,7 +462,7 @@ public class MainActivity extends Activity {
         });
         eraser_width3.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                drawView.setmPenWidth(6f);
+                drawView.setmPenWidth(30f);
                 Log.e("BigWhite", "selected 6f pen size");
                 mEraser.setSelected(true);
                 paint.setAlpha(0);
